@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx esbuild --bundle src/index.ts  --outdir=public --servedir=public"
+    "start": "npx esbuild --bundle src/index.tsx  --outdir=public --servedir=public"
   },
   "author": "= <=>",
   "license": "UNLICENSED",
   "dependencies": {
-    "esbuild": "^0.16.17"
+    "esbuild": "^0.16.17",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }
