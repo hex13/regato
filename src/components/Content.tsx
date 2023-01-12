@@ -1,19 +1,20 @@
 import React from 'react';
 import { Transform } from './Transform';
 import { useInterval } from './helpers';
+import { ObjectLayer } from './ObjectLayer';
 
+const initialObjects = [
+    {id: 1, position: {x: 100, y: 200}, velocity: {x: 1, y: 0}},
+    {id: 2, position: {x: 200, y: 300}, velocity: {x: 0, y: -1}},
+    {id: 3, position: {x: 200, y: 300}, velocity: {x: -0.5, y: -0.5}},
+];
 export function Content() {
-    const radius = 100;
-    const [angle, setAngle] = React.useState(0);
-    const [center, setCenter] = React.useState({x: 300, y: 300});
+    const [objects, setObjects] = React.useState(initialObjects);
     useInterval(() => {
-        setAngle(angle => angle + 0.01);
-    }, 100);
-    useInterval(() => {
-        setCenter(center => ({x: center.x + 2, y: center.y}));
-    }, 30);
+        setObjects(objects => objects.map(o => ({...o, position: {x: o.position.x + o.velocity.x, y: o.position.y + o.velocity.y }})));
+    }, 16);
+
     return <>
-        <Transform transform={{position: {x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius}}}/>
-        <Transform transform={{position: center}}/>
+        <ObjectLayer objects={objects}/>
     </>
 }
