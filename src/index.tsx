@@ -1,7 +1,10 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom/client';
+import { App } from './components/App';
 
 const container = document.getElementById('app');
 
 const root = ReactDOM.createRoot(container);
-root.render(<h1>Hello World</h1>);
+root.render(<App build={1}>
+    :)
+</App>);
