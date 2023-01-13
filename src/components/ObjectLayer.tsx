@@ -1,5 +1,6 @@
 import React from 'react';
-import { Transform, GameObject } from './Transform';
+import { Transform } from './Transform';
+import { GameObject } from '../objects';
 
 interface ObjectLayerProps {
     objects: Array<GameObject>;

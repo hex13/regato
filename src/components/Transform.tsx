@@ -1,11 +1,6 @@
 import React from 'react';
+import { GameObject } from '../objects';
 
-export type GameObject = {
-    position: {x: number, y: number};
-    velocity: {x: number, y: number};
-    events: Record<string, (e: any, self: GameObject) => void>;
-    id: number;
-}
 interface TransformProps {
     object: GameObject
 }

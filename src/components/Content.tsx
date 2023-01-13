@@ -1,12 +1,17 @@
 import React from 'react';
-import { Transform, GameObject } from './Transform';
+import { Transform } from './Transform';
+import { GameObject } from '../objects';
 import { useInterval } from './helpers';
 import { ObjectLayer } from './ObjectLayer';
+import { runCommands, parseCommands } from '../commands';
 
 const initialObjects: Array<GameObject> = [
     {id: 1, position: {x: 100, y: 200}, velocity: {x: 0.3, y: 0}, events: {
         click(e: any, self: GameObject) {
-            self.position.x = 300;
+
+            runCommands(self, parseCommands(`
+                setPosition 300 300
+            `));
         }
     }},
     {id: 2, position: {x: 200, y: 300}, velocity: {x: 0, y: -0.7}, events: {}},
