@@ -10,6 +10,10 @@ export function runCommands(self: GameObject, lines: Line[]) {
                 self.position.x = parseFloat(line[1] as string);
                 self.position.y = parseFloat(line[2] as string);
                 break;
+            case 'setVelocity':
+                self.velocity.x = parseFloat(line[1] as string);
+                self.velocity.y = parseFloat(line[2] as string);
+                break;
         }
     })
 }

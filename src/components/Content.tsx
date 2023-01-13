@@ -3,19 +3,19 @@ import { Transform } from './Transform';
 import { GameObject } from '../objects';
 import { useInterval } from './helpers';
 import { ObjectLayer } from './ObjectLayer';
+import { CommandEditor } from './CommandEditor';
 import { runCommands, parseCommands } from '../commands';
 
 const initialObjects: Array<GameObject> = [
     {id: 1, position: {x: 100, y: 200}, velocity: {x: 0.3, y: 0}, events: {
         click(e: any, self: GameObject) {
-
-            runCommands(self, parseCommands(`
-                setPosition 300 300
-            `));
+            if (self.eventCodes.click) runCommands(self, parseCommands(self.eventCodes.click))
         }
+    }, eventCodes: {
+        click: 'setPosition 300 300',
     }},
-    {id: 2, position: {x: 200, y: 300}, velocity: {x: 0, y: -0.7}, events: {}},
-    {id: 3, position: {x: 200, y: 300}, velocity: {x: -0.5, y: -0.5}, events: {}},
+    {id: 2, position: {x: 200, y: 300}, velocity: {x: 0, y: -0.7}, events: {}, eventCodes: {}},
+    {id: 3, position: {x: 200, y: 300}, velocity: {x: -0.5, y: -0.5}, events: {}, eventCodes: {}},
 ];
 export function Content() {
     const [objects, setObjects] = React.useState(initialObjects);
@@ -25,5 +25,6 @@ export function Content() {
 
     return <>
         <ObjectLayer objects={objects}/>
+        <CommandEditor object={objects[0] as GameObject}/>
     </>
 }
