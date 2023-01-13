@@ -4,9 +4,11 @@ import { useInterval } from './helpers';
 import { ObjectLayer } from './ObjectLayer';
 
 const initialObjects = [
-    {id: 1, position: {x: 100, y: 200}, velocity: {x: 1, y: 0}},
-    {id: 2, position: {x: 200, y: 300}, velocity: {x: 0, y: -1}},
-    {id: 3, position: {x: 200, y: 300}, velocity: {x: -0.5, y: -0.5}},
+    {id: 1, position: {x: 100, y: 200}, velocity: {x: 0.3, y: 0}, events: {
+        click(e: any) { alert(e.clientX)}
+    }},
+    {id: 2, position: {x: 200, y: 300}, velocity: {x: 0, y: -0.7}, events: {}},
+    {id: 3, position: {x: 200, y: 300}, velocity: {x: -0.5, y: -0.5}, events: {}},
 ];
 export function Content() {
     const [objects, setObjects] = React.useState(initialObjects);
