@@ -25,7 +25,7 @@ const keywords = ['await', 'if', 'for', 'let', 'of'];
 export const binaryOperators: Record<string, [number]> = {
     '.': [10],
     '<': [10],
-    '=': [10],
+    '=': [5],
     '**': [10],
     '*': [20],
     '+': [10],

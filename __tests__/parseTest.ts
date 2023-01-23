@@ -12,6 +12,15 @@ it('parse number', () => {
     });
 });
 
+it('parse identifier', () => {
+    const ast = parse('foo');
+    expect(ast).toEqual({
+        kind: IDENT,
+        value: "foo",
+    });
+});
+
+
 
 it('parse binary expression', () => {
     const ast = parse('2 + 3');
@@ -102,3 +111,28 @@ it('parse two binary left-associative expressions when second operator has great
         },
     });
 });
+
+it('parse assignment of expression to variable', () => {
+    const ast = parse('abc = 10 + 2');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        left: {
+            kind: IDENT,
+            value: "abc",
+        },
+        right: {
+            kind: BINARY_OP,
+            value: '+',
+            left: {
+                kind: NUMBER,
+                value: 10,
+            },
+            right: {
+                kind: NUMBER,
+                value: 2,
+            }
+        },
+        value: '='
+    });
+});
+
