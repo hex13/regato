@@ -22,17 +22,17 @@ export const Ident = (value: string) => Token(IDENT, value);
 export const BinaryOp = (value: string) => Token(BINARY_OP, value);
 
 const keywords = ['await', 'if', 'for', 'let', 'of'];
-const binaryOperators = {
-    '.': [],
-    '<': [],
-    '=': [],
-    '**': [],
-    '*': [],
-    '+': [],
-    '-': [],
-    '/': [],
-    '<-': [],
-    '<=': [],
+export const binaryOperators: Record<string, [number]> = {
+    '.': [10],
+    '<': [10],
+    '=': [10],
+    '**': [10],
+    '*': [20],
+    '+': [10],
+    '-': [10],
+    '/': [20],
+    '<-': [10],
+    '<=': [10],
 };
 
 export function tokenize(code: string) {
