@@ -10,6 +10,7 @@ export const SEMICOLON = 'semicolon';
 export const NUMBER = 'number';
 export const STRING = 'string';
 export const BINARY_OP = 'binaryop';
+export const BLOCK = 'block';
 
 
 const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=]/g

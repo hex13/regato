@@ -1,6 +1,7 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
-    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING,
+    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, 
+    BLOCK,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
 
@@ -133,6 +134,56 @@ it('parse assignment of expression to variable', () => {
             }
         },
         value: '='
+    });
+});
+
+it('parse empty block', () => {
+     const ast = parse(``, 'block');
+     expect(ast).toEqual({
+        kind: BLOCK,
+        body: [],
+     })
+});
+
+it('parse block with expressions inside of it', () => {
+    const ast = parse(`
+        2 + 3; 
+        1 * 10; 
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: BINARY_OP,
+                value: '+',
+                left: {kind: NUMBER, value: 2},
+                right: {kind: NUMBER, value: 3},
+            },
+            {
+                kind: BINARY_OP,
+                value: '*',
+                left: {kind: NUMBER, value: 1},
+                right: {kind: NUMBER, value: 10},
+            },
+        ]
+    });
+});
+
+it('parse block with inner block', () => {
+    const ast = parse(`
+        {
+
+        }
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: BLOCK,
+                body: [
+                ]
+            },
+        ]
     });
 });
 

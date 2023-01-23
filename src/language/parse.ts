@@ -1,48 +1,20 @@
 import {
     tokenize,
-    BINARY_OP,
-    binaryOperators,
 } from './tokenize';
+import { Parser } from './Parser';
 
-export function parseTokens(tokens: any[]) {
-    function next() {
-        return tokens.shift();
+export function parseTokens(tokens: any[], context: string) {
+    const parser = new Parser(tokens);
+    switch (context) {
+        case 'block':
+            return parser.parseBlock();
+        case 'expr':
+        default:
+            return parser.parseExpression();
     }
-
-    function applyOperator(token: any) {
-        const right = expressions.pop();
-        const left = expressions.pop();
-        expressions.push({
-            kind: token.kind,
-            value: token.value,
-            left,
-            right,
-        });
-    }
-
-    let token;
-    const operators = [];
-    const expressions: any[] = [];
-    while (token = next()) {
-        if (token.kind == BINARY_OP) {
-            const currentPrecedence = binaryOperators[token.value]![0];
-            while (operators.length && binaryOperators[operators.at(-1)!.value]![0] >= currentPrecedence) {
-                    applyOperator(operators.pop());
-            }
-            operators.push(token);
-        } else {
-            expressions.push(token);
-        }
-    }
-    while (token = operators.pop()) {
-        applyOperator(token);
-    }
-    return expressions[0];
-
 }
 
-export function parse(code: string) {
+export function parse(code: string, context: string = 'expr') {
     const tokens = tokenize(code);
-    return parseTokens(tokens);
-
+    return parseTokens(tokens, context);
 }
