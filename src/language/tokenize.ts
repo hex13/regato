@@ -11,6 +11,7 @@ export const NUMBER = 'number';
 export const STRING = 'string';
 export const BINARY_OP = 'binaryop';
 export const BLOCK = 'block';
+export const LET = 'let';
 
 
 const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=]/g
@@ -22,7 +23,8 @@ export const Keyword = (value: string) => Token(KEYWORD, value);
 export const Ident = (value: string) => Token(IDENT, value);
 export const BinaryOp = (value: string) => Token(BINARY_OP, value);
 
-const keywords = ['await', 'if', 'for', 'let', 'of'];
+export const keywords = ['await', 'if', 'for', 'let', 'of'];
+
 export const binaryOperators: Record<string, [number]> = {
     '.': [10],
     '<': [10],

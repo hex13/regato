@@ -1,7 +1,7 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, 
-    BLOCK,
+    BLOCK, LET,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
 
@@ -187,3 +187,58 @@ it('parse block with inner block', () => {
     });
 });
 
+it('parse `let` declarations without initialization', () => {
+    const ast = parse(`
+        let blah;
+        let wow;
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: LET,
+                name: "blah",
+            },
+            {
+                kind: LET,
+                name: "wow",
+            }
+        ]
+    });
+});
+
+it('parse `let` declarations with initialization', () => {
+    const ast = parse(`
+        let greeting = "Hello World";
+        let wow = 1 + 2;
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: LET,
+                name: "greeting",
+                init: {
+                    kind: STRING,
+                    value: "Hello World",
+                }
+            },
+            {
+                kind: LET,
+                name: "wow",
+                init: {
+                    kind: BINARY_OP,
+                    value: '+',
+                    left: {
+                        kind: NUMBER,
+                        value: 1,
+                    },
+                    right: {
+                        kind: NUMBER,
+                        value: 2,
+                    }
+                }
+            }
+        ]
+    });
+});
