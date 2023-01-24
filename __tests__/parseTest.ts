@@ -1,7 +1,7 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, 
-    BLOCK, LET, FOR,
+    BLOCK, LET, FOR, IF,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
 
@@ -169,7 +169,7 @@ it('parse block with expressions inside of it', () => {
     });
 });
 
-it('parse block with inner block', () => {
+it('parse block with inner empty block', () => {
     const ast = parse(`
         {
 
@@ -186,6 +186,35 @@ it('parse block with inner block', () => {
         ]
     });
 });
+
+it('parse block with two inner empty blocks', () => {
+    const ast = parse(`
+        {
+
+        }
+
+        {
+
+        }
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: BLOCK,
+                body: [
+
+                ]
+            },
+            {
+                kind: BLOCK,
+                body: [
+                ]
+            },
+        ]
+    });
+});
+
 
 it('parse `let` declarations without initialization', () => {
     const ast = parse(`
@@ -270,3 +299,85 @@ it('parse `for of` loop', () => {
         ]
     })
 });
+
+it('parse `if`', () => {
+    const ast = parse(`
+        if 1 < 2 {
+            3; 4;
+        }
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: IF,
+                condition: {
+                    kind: BINARY_OP,
+                    value: '<',
+                    left: {
+                        kind: NUMBER,
+                        value: 1,
+                    },
+                    right: {
+                        kind: NUMBER,
+                        value: 2
+                    }
+                },
+                block: {
+                    kind: BLOCK,
+                    body: [
+                        {kind: NUMBER, value: 3},
+                        {kind: NUMBER, value: 4},
+                    ]
+                }
+            }
+        ]
+    })
+});
+
+
+it('parse `if else`', () => {
+    const ast = parse(`
+        if 1 < 2 {
+            3; 4;
+        } else {
+            5; 6;
+        }
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: IF,
+                condition: {
+                    kind: BINARY_OP,
+                    value: '<',
+                    left: {
+                        kind: NUMBER,
+                        value: 1,
+                    },
+                    right: {
+                        kind: NUMBER,
+                        value: 2
+                    }
+                },
+                block: {
+                    kind: BLOCK,
+                    body: [
+                        {kind: NUMBER, value: 3},
+                        {kind: NUMBER, value: 4},
+                    ]
+                },
+                elseBlock: {
+                    kind: BLOCK,
+                    body: [
+                        {kind: NUMBER, value: 5},
+                        {kind: NUMBER, value: 6},
+                    ]
+                }
+            }
+        ]
+    })
+});
+
+

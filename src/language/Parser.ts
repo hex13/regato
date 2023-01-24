@@ -8,6 +8,7 @@ import {
     IDENT,
     LET,
     FOR,
+    IF,
     SEMICOLON,
     binaryOperators,
 } from './tokenize';
@@ -28,6 +29,9 @@ export class Parser {
     }
     eat(value: string) {
         const token = this.next();
+        if (!token) {
+            throw new Error(`Syntax error. Expected '${value}' but found end of file.'`);
+        }
         if (token.value != value) {
             throw new Error(`Syntax error. Expected '${value}' but found '${token.value}'`);
         }
@@ -47,13 +51,18 @@ export class Parser {
                     case 'for':
                         body.push(this.parseFor());
                         break;
+                    case 'if':
+                        body.push(this.parseIf());
+                        break;
                     default:
                         throw new Error(`Unexpected keyword '${nextToken.value}'.`);
                 }
             } else {
                 body.push(this.parseExpression());
             }
-
+        }
+        if (this.peek()  && this.peek().kind == RIGHT_BRACE) {
+            this.next();
         }
         return {
             kind: BLOCK,
@@ -86,6 +95,25 @@ export class Parser {
             name: ident.value,
             init,
         }
+    }
+    parseIf() {
+        this.eat('if');
+        const condition = this.parseExpression();
+        this.eat('{');
+        const block = this.parseBlock();
+        const nextToken = this.peek();
+        let elseBlock;
+        if (nextToken && nextToken.kind == IDENT && nextToken.value == 'else') {
+            this.eat('else');
+            this.eat('{');
+            elseBlock = this.parseBlock();
+        }
+        return {
+            kind: IF,
+            condition,
+            block,
+            elseBlock,
+        };
     }
     parseFor() {
         this.eat('for');

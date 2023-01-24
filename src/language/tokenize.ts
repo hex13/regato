@@ -13,6 +13,7 @@ export const BINARY_OP = 'binaryop';
 export const BLOCK = 'block';
 export const LET = 'let';
 export const FOR = 'for';
+export const IF = 'if';
 
 
 const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=]/g
