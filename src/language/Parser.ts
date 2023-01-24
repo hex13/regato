@@ -7,6 +7,7 @@ import {
     KEYWORD,
     IDENT,
     LET,
+    FOR,
     SEMICOLON,
     binaryOperators,
 } from './tokenize';
@@ -42,6 +43,12 @@ export class Parser {
                 switch (nextToken.value) {
                     case 'let':
                         body.push(this.parseLet());
+                        break;
+                    case 'for':
+                        body.push(this.parseFor());
+                        break;
+                    default:
+                        throw new Error(`Unexpected keyword '${nextToken.value}'.`);
                 }
             } else {
                 body.push(this.parseExpression());
@@ -58,10 +65,13 @@ export class Parser {
             throw new Error(msg);
         }
     }
+    assertIdentifier(ident: any) {
+        this.assert(ident.kind === IDENT, 'Syntax error: expected identifier. found ' + ident.value);
+    }
     parseLet() {
         this.eat('let');
         const ident = this.next();
-        this.assert(ident.kind === IDENT, 'Syntax error: expected identifier. found ' + ident.value);
+        this.assertIdentifier(ident);
         const nextToken = this.peek();
         let init;
         if (nextToken.kind == BINARY_OP && nextToken.value == '=') {
@@ -75,6 +85,27 @@ export class Parser {
             kind: LET,
             name: ident.value,
             init,
+        }
+    }
+    parseFor() {
+        this.eat('for');
+
+        const ident = this.next();
+        this.assertIdentifier(ident);
+        const item = ident.value;
+
+        this.eat('of');
+
+        const iterable = this.parseExpression();
+
+        this.eat('{');
+        const block = this.parseBlock();
+
+        return {
+            kind: FOR,
+            item,
+            iterable,
+            block,
         }
     }
     parseExpression() {
@@ -104,10 +135,15 @@ export class Parser {
             } else {
                 expressions.push(token);
             }
+
+            if (this.peek() && this.peek().kind == LEFT_BRACE) {
+                break;
+            }
         }
         while (token = operators.pop()) {
             applyOperator(token);
         }
+
         return expressions[0];
     }
 

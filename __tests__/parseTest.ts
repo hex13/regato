@@ -1,7 +1,7 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, 
-    BLOCK, LET,
+    BLOCK, LET, FOR,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
 
@@ -241,4 +241,32 @@ it('parse `let` declarations with initialization', () => {
             }
         ]
     });
+});
+
+it('parse `for of` loop', () => {
+    const ast = parse(`
+        for sth of arr {
+            1; 2;
+        }
+    `, 'block');
+    expect(ast).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: FOR,
+                item: 'sth',
+                iterable: {
+                    kind: IDENT,
+                    value: 'arr',
+                },
+                block: {
+                    kind: BLOCK,
+                    body: [
+                        {kind: NUMBER, value: 1},
+                        {kind: NUMBER, value: 2},
+                    ]
+                }
+            }
+        ]
+    })
 });

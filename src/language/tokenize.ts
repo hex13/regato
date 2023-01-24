@@ -12,6 +12,7 @@ export const STRING = 'string';
 export const BINARY_OP = 'binaryop';
 export const BLOCK = 'block';
 export const LET = 'let';
+export const FOR = 'for';
 
 
 const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=]/g
