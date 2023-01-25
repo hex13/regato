@@ -15,6 +15,10 @@ export const LET = 'let';
 export const FOR = 'for';
 export const IF = 'if';
 export const LIST = 'list';
+export const CALL = 'call';
+
+export const CALL_OPERATOR = '()';
+
 
 
 const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=,]/g
@@ -29,7 +33,7 @@ export const BinaryOp = (value: string) => Token(BINARY_OP, value);
 export const keywords = ['await', 'if', 'for', 'let', 'of'];
 
 export const binaryOperators: Record<string, [number]> = {
-    '.': [10],
+    '.': [15],
     '<': [10],
     '=': [5],
     '**': [10],
@@ -40,10 +44,18 @@ export const binaryOperators: Record<string, [number]> = {
     '<-': [10],
     '<=': [10],
     ',': [8],
+    '()': [4],
 };
 
+
+function canBePostfixReceiver(token: any) {
+    if (!token) return false;
+    return token.kind == IDENT;
+}
+
 export function tokenize(code: string) {
-    return Array.from(code.matchAll(re)).map((match: any) => {
+    const tokens: any[] = [];
+    Array.from(code.matchAll(re)).forEach((match: any, i) => {
         let value = match[0];
         let kind = '?';
         const number = parseFloat(value);
@@ -64,6 +76,9 @@ export function tokenize(code: string) {
         } else if (value == ';') {
             kind = SEMICOLON;
         } else if (value == '(') {
+            if (canBePostfixReceiver(tokens.at(-1))) {
+                tokens.push(Token(BINARY_OP, CALL_OPERATOR));
+            }
             kind = LEFT_PAREN;
         } else if (value == ')') {
             kind = RIGHT_PAREN;
@@ -71,8 +86,9 @@ export function tokenize(code: string) {
             kind = BINARY_OP;
         }
 
-        return Token(kind, value);
+        tokens.push(Token(kind, value));
     });
+    return tokens;
 }
 
 

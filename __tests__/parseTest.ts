@@ -1,6 +1,6 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
-    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, 
+    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL, CALL_OPERATOR,
     BLOCK, LET, FOR, IF, LIST,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
@@ -220,6 +220,90 @@ it('parse commas', () => {
         ]
     });
 });
+
+it('parse function calls with one argument', () => {
+    const ast = parse('sin(alpha)');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: CALL_OPERATOR,
+        left: {
+            kind: IDENT, value: 'sin',
+        },
+        right: {
+            kind: IDENT, value: 'alpha'
+        },
+    });
+});
+
+
+it('parse function calls with many arguments', () => {
+    const ast = parse('foo(10, 20 + 1, 30)');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: CALL_OPERATOR,
+        left: {
+            kind: IDENT, value: 'foo',
+        },
+        right: {
+            kind: LIST,
+            items: [
+                {kind: NUMBER, value: 10},
+                {
+                    kind: BINARY_OP,
+                    value: '+',
+                    left: {kind: NUMBER, value: 20},
+                    right: {kind: NUMBER, value: 1},
+
+                },
+                {kind: NUMBER, value: 30},
+            ]
+        }
+    });
+});
+
+it('parse nested function calls', () => {
+    const ast = parse('foo(bar(2))');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: CALL_OPERATOR,
+        left: {kind: IDENT, value: 'foo'},
+        right: {
+            kind: BINARY_OP,
+            value: CALL_OPERATOR,
+            left: {
+                kind: IDENT,
+                value: 'bar',
+            },
+            right: {
+                kind: NUMBER,
+                value: 2,
+            },
+        },
+    });
+});
+
+
+it('parse member expression calls', () => {
+    const ast = parse('foo.bar(10)');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: CALL_OPERATOR,
+        left: {
+            kind: BINARY_OP,
+            value: '.',
+            left: {
+                kind: IDENT,
+                value: 'foo',
+            },
+            right: {
+                kind: IDENT,
+                value: 'bar',
+            },
+        },
+        right: {kind: NUMBER, value: 10},
+    });
+});
+
 
 it('parse empty block', () => {
      const ast = parse(``, 'block');

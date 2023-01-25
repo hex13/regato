@@ -1,6 +1,6 @@
 import { tokenize, 
     Token, Semicolon, Keyword, Ident, BinaryOp,
-    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING,
+    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL,
 } from '../src/language/tokenize';
 const assert = require('assert');
 test('tokenize()', () => {
@@ -28,6 +28,7 @@ test('tokenize()', () => {
     
         Token(KEYWORD, 'await'),
         Token(IDENT, 'abc'),
+        Token(BINARY_OP, '()'),
         Token(LEFT_PAREN, '('),
         Token(NUMBER, 10),
         Token(BINARY_OP, ','),
