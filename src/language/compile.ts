@@ -32,6 +32,14 @@ export function compileToTokens(ast: any): any[] {
                 tokens.push({kind: RIGHT_PAREN, value: ')'});
                 visit(node.block);
                 break;
+            case LET:
+                tokens.push({kind: LET, value: 'let'});
+                tokens.push({kind: IDENT, value: node.name});
+                if (node.init) {
+                    tokens.push({kind: BINARY_OP, value: '='});
+                    visit(node.init);
+                }
+                break;
             default:
                 tokens.push({kind: node.kind, value: node.value});
         }

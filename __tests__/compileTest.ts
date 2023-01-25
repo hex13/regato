@@ -94,6 +94,31 @@ it('compile `for`', () => {
     ]);
 });
 
+it('compile `let` declaration without initialization', () => {
+    let ast, tokens;
+    ast = parse(`
+        let foo;
+    `, 'block');
+    tokens = compileToTokens(ast.body[0]);
+    expect(tokens).toEqual([
+        {kind: LET, value: 'let'},
+        {kind: IDENT, value: 'foo'},
+    ]);
+});
+
+it('compile `let` declaration with initialization', () => {
+    let ast, tokens;
+    ast = parse(`
+        let foo = a;
+    `, 'block');
+    tokens = compileToTokens(ast.body[0]);
+    expect(tokens).toEqual([
+        {kind: LET, value: 'let'},
+        {kind: IDENT, value: 'foo'},
+        {kind: BINARY_OP, value: '='},
+        {kind: IDENT, value: 'a'},
+    ]);
+});
 
 // TODO make it working
 xit('compile example', () => {
