@@ -14,9 +14,10 @@ export const BLOCK = 'block';
 export const LET = 'let';
 export const FOR = 'for';
 export const IF = 'if';
+export const LIST = 'list';
 
 
-const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=]/g
+const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=,]/g
 type Kind = string;
 type Value = string | number;
 export const Token = (kind: Kind, value: Value) => ({kind, value});
@@ -38,6 +39,7 @@ export const binaryOperators: Record<string, [number]> = {
     '/': [20],
     '<-': [10],
     '<=': [10],
+    ',': [8],
 };
 
 export function tokenize(code: string) {

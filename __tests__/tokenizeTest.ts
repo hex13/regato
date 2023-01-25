@@ -6,7 +6,7 @@ const assert = require('assert');
 test('tokenize()', () => {
     const code = `
     for item of array {
-        await abc();
+        await abc(10,20);
         foo.bar.baz;
 
         if 12< 3{
@@ -29,6 +29,9 @@ test('tokenize()', () => {
         Token(KEYWORD, 'await'),
         Token(IDENT, 'abc'),
         Token(LEFT_PAREN, '('),
+        Token(NUMBER, 10),
+        Token(BINARY_OP, ','),
+        Token(NUMBER, 20),
         Token(RIGHT_PAREN, ')'),
         Semicolon(),
     

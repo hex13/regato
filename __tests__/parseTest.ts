@@ -1,7 +1,7 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, 
-    BLOCK, LET, FOR, IF,
+    BLOCK, LET, FOR, IF, LIST,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
 
@@ -200,6 +200,24 @@ it('parse assignment of expression to variable', () => {
             }
         },
         value: '='
+    });
+});
+
+it('parse commas', () => {
+    const ast = parse('a, b, c + d, e');
+    expect(ast).toEqual({
+        kind: LIST,
+        items: [
+            {kind: IDENT, value: 'a'},
+            {kind: IDENT, value: 'b'},
+            {
+                kind: BINARY_OP,
+                value: '+',
+                left: {kind: IDENT, value: 'c'},
+                right: {kind: IDENT, value: 'd'},
+            },
+            {kind: IDENT, value: 'e'},
+        ]
     });
 });
 

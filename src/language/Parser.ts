@@ -12,6 +12,7 @@ import {
     FOR,
     IF,
     SEMICOLON,
+    LIST,
     binaryOperators,
 } from './tokenize';
 
@@ -142,12 +143,24 @@ export class Parser {
         function applyOperator(token: any) {
             const right = expressions.pop();
             const left = expressions.pop();
-            expressions.push({
-                kind: token.kind,
-                value: token.value,
-                left,
-                right,
-            });
+            if (token.value == ',') {
+                if (left.kind == LIST) {
+                    left.items.push(right);
+                    expressions.push(left);
+                } else {
+                    expressions.push({
+                        kind: LIST,
+                        items: [left, right],
+                    });
+                }
+            } else {
+                expressions.push({
+                    kind: token.kind,
+                    value: token.value,
+                    left,
+                    right,
+                });
+            }
         }
 
         let token;
