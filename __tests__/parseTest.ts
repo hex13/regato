@@ -113,6 +113,72 @@ it('parse two binary left-associative expressions when second operator has great
     });
 });
 
+it('parse parentheses.', () => {
+    const ast = parse('(3 + 4) * 5');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: '*',
+        left: {
+            kind: BINARY_OP,
+            value: '+',
+            left: {
+                kind: NUMBER,
+                value: 3,
+            },
+            right: {
+                kind: NUMBER,
+                value: 4,
+            }
+        },
+        right: {
+            kind: NUMBER,
+            value: 5,
+        },
+    });
+});
+
+it('parse nested parentheses.', () => {
+    const ast = parse('(3 + 4 * (10 + 20)) * 5');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: '*',
+        left: {
+            kind: BINARY_OP,
+            value: '+',
+            left: {
+                kind: NUMBER,
+                value: 3,
+            },
+            right: {
+                kind: BINARY_OP,
+                value: '*',
+                left: {
+                    kind: NUMBER,
+                    value: 4,
+                },
+                right: {
+                    kind: BINARY_OP,
+                    value: '+',
+                    left: {
+                        kind: NUMBER,
+                        value: 10,
+                    },
+                    right: {
+                        kind: NUMBER,
+                        value: 20,
+                    }
+                }
+            }
+        },
+        right: {
+            kind: NUMBER,
+            value: 5,
+        },
+    });
+});
+
+
+
 it('parse assignment of expression to variable', () => {
     const ast = parse('abc = 10 + 2');
     expect(ast).toEqual({

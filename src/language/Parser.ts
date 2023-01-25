@@ -4,6 +4,8 @@ import {
     BLOCK,
     LEFT_BRACE,
     RIGHT_BRACE,
+    LEFT_PAREN,
+    RIGHT_PAREN,
     KEYWORD,
     IDENT,
     LET,
@@ -149,15 +151,23 @@ export class Parser {
         }
 
         let token;
-        const operators = [];
+        const operators: any[] = [];
         const expressions: any[] = [];
         while (token = this.next()) {
             if (token.kind == SEMICOLON) {
                 break;
-            } if (token.kind == BINARY_OP) {
+            } if (token.kind == LEFT_PAREN) {
+                operators.push(token);
+            } else if (token.kind == RIGHT_PAREN) {
+                while (operators.length && operators.at(-1).kind !== LEFT_PAREN) {
+                    applyOperator(operators.pop());
+                }
+                operators.pop();
+            } else if (token.kind == BINARY_OP) {
                 const currentPrecedence = binaryOperators[token.value]![0];
-                while (operators.length && binaryOperators[operators.at(-1)!.value]![0] >= currentPrecedence) {
-                        applyOperator(operators.pop());
+
+                while (operators.length && operators.at(-1).kind !== LEFT_PAREN && binaryOperators[ operators.at(-1)!.value]![0] >= currentPrecedence) {
+                    applyOperator(operators.pop());
                 }
                 operators.push(token);
             } else {
@@ -171,7 +181,6 @@ export class Parser {
         while (token = operators.pop()) {
             applyOperator(token);
         }
-
         return expressions[0];
     }
 

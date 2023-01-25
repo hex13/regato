@@ -120,6 +120,67 @@ it('compile `let` declaration with initialization', () => {
     ]);
 });
 
+it('adds parentheses when needed on the left side', () => {
+    let ast, tokens;
+    ast = parse(`
+        (3+4+5) * 2;
+    `, 'block');
+    tokens = compileToTokens(ast.body[0]);
+    expect(tokens).toEqual([
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 3},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 4},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 5},
+        {kind: RIGHT_PAREN, value: ')'},
+        {kind: BINARY_OP, value: '*'},
+        {kind: NUMBER, value: 2},
+    ]);
+});
+
+it('adds parentheses when needed on the right side', () => {
+    let ast, tokens;
+    ast = parse(`
+        2 * (3+4+5);
+    `, 'block');
+    tokens = compileToTokens(ast.body[0]);
+    expect(tokens).toEqual([
+        {kind: NUMBER, value: 2},
+        {kind: BINARY_OP, value: '*'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 3},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 4},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 5},
+        {kind: RIGHT_PAREN, value: ')'},
+    ]);
+});
+
+it('adds nested parentheses', () => {
+    let ast, tokens;
+    ast = parse(`
+        2 * ( 3 + 4 * (5 + 6))
+    `, 'block');
+    tokens = compileToTokens(ast.body[0]);
+    expect(tokens).toEqual([
+        {kind: NUMBER, value: 2},
+        {kind: BINARY_OP, value: '*'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 3},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 4},
+        {kind: BINARY_OP, value: '*'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 5},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 6},
+        {kind: RIGHT_PAREN, value: ')'},
+        {kind: RIGHT_PAREN, value: ')'},
+    ]);
+});
+
 // TODO make it working
 xit('compile example', () => {
     let ast, tokens;
