@@ -1,6 +1,8 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
-    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, SEMICOLON,
+    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN,
+    LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET,
+    BINARY_OP, NUMBER, STRING, SEMICOLON,
     BLOCK, LET, FOR, IF,
 } from '../src/language/tokenize';
 import { compileToTokens } from '../src/language/compile';
@@ -193,6 +195,22 @@ it('compile list', () => {
         {kind: NUMBER, value: 789},
     ]);
 });
+
+it('compile array', () => {
+    let ast, tokens;
+    ast = parse('[123, 456, 789]');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: LEFT_SQUARE_BRACKET, value: '['},
+        {kind: NUMBER, value: 123},
+        {kind: BINARY_OP, value: ','},
+        {kind: NUMBER, value: 456},
+        {kind: BINARY_OP, value: ','},
+        {kind: NUMBER, value: 789},
+        {kind: RIGHT_SQUARE_BRACKET, value: ']'},
+    ]);
+});
+
 
 it('compile function call with one argument', () => {
     let ast, tokens;
