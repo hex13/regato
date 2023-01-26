@@ -181,15 +181,81 @@ it('adds nested parentheses', () => {
     ]);
 });
 
+it('compile list', () => {
+    let ast, tokens;
+    ast = parse('123, 456, 789');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: NUMBER, value: 123},
+        {kind: BINARY_OP, value: ','},
+        {kind: NUMBER, value: 456},
+        {kind: BINARY_OP, value: ','},
+        {kind: NUMBER, value: 789},
+    ]);
+});
+
+it('compile function call with one argument', () => {
+    let ast, tokens;
+    ast = parse('foo(123)');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: IDENT, value: 'foo'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 123},
+        {kind: RIGHT_PAREN, value: ')'},
+    ]);
+});
+
+it('compile function call with multiple arguments', () => {
+    let ast, tokens;
+    ast = parse('foo(123, 456 + 789)');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: IDENT, value: 'foo'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 123},
+        {kind: BINARY_OP, value: ','},
+        {kind: NUMBER, value: 456},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 789},
+        {kind: RIGHT_PAREN, value: ')'},
+    ]);
+});
+
+it('compile function call on multiple member expressions', () => {
+    let ast, tokens;
+    ast = parse('foo.bar.baz(123, 456 + 789)');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: IDENT, value: 'foo'},
+        {kind: BINARY_OP, value: '.'},
+        {kind: IDENT, value: 'bar'},
+        {kind: BINARY_OP, value: '.'},
+        {kind: IDENT, value: 'baz'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 123},
+        {kind: BINARY_OP, value: ','},
+        {kind: NUMBER, value: 456},
+        {kind: BINARY_OP, value: '+'},
+        {kind: NUMBER, value: 789},
+        {kind: RIGHT_PAREN, value: ')'},
+    ]);
+});
+
+
 // TODO make it working
 xit('compile example', () => {
     let ast, tokens;
     ast = parse(`
         let arr = $;
+        console.log("hello " + "world");
         for a of arr {
-            item = 123 + 456;
+            item =      2 * ( 3 + 4 * (5 + 6));
+            let foo = document.body;
         }
     `, 'block');
+
     tokens = compileToTokens(ast);
+    // console.log("TTTTT%%%%%", tokens)
     fs.writeFileSync('out.js', tokens.map(t => t.value).join(' '), 'utf8',);
 });

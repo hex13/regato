@@ -2,6 +2,7 @@ import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, SEMICOLON,
     BLOCK, LET, FOR, IF, binaryOperators,
+    CALL_OPERATOR, LIST,
 } from './tokenize';
 
 
@@ -10,6 +11,13 @@ export function compileToTokens(ast: any): any[] {
     const visit = (node: any) => {
         switch (node.kind) {
             case BINARY_OP: {
+                if (node.value == CALL_OPERATOR) {
+                    visit(node.left);
+                    tokens.push({kind: LEFT_PAREN, value: '('});
+                    visit(node.right);
+                    tokens.push({kind: RIGHT_PAREN, value: ')'});
+                    return;
+                }
                 const currPrec = binaryOperators[node.value]![0];
                 let needsParens;
                 let subexpr;
@@ -73,6 +81,13 @@ export function compileToTokens(ast: any): any[] {
                     visit(node.init);
                 }
                 break;
+            case LIST:
+                node.items.forEach((item: any, i: number) => {
+                    visit(item);
+                    if (i < node.items.length - 1) tokens.push({kind: BINARY_OP, value: ','});
+                })
+                break;
+
             default:
                 tokens.push({kind: node.kind, value: node.value});
         }
