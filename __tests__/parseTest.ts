@@ -1,6 +1,6 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
-    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL, CALL_OPERATOR,
+    KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL, CALL_OPERATOR, ARRAY,
     BLOCK, LET, FOR, IF, LIST,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
@@ -301,6 +301,33 @@ it('parse member expression calls', () => {
             },
         },
         right: {kind: NUMBER, value: 10},
+    });
+});
+
+it('parse array expressions with one element', () => {
+    const ast = parse('[a]');
+    expect(ast).toEqual({
+        kind: ARRAY,
+        items: [
+            {kind: IDENT, value: 'a'},
+        ]
+    });
+});
+
+it('parse array expressions with multiple elements', () => {
+    const ast = parse('[a, b + 2, c]');
+    expect(ast).toEqual({
+        kind: ARRAY,
+        items: [
+            {kind: IDENT, value: 'a'},
+            {
+                kind: BINARY_OP,
+                value: '+',
+                left: {kind: IDENT, value: 'b'},
+                right: {kind: NUMBER, value: 2},
+            },
+            {kind: IDENT, value: 'c'},
+        ]
     });
 });
 

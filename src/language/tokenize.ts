@@ -16,12 +16,16 @@ export const FOR = 'for';
 export const IF = 'if';
 export const LIST = 'list';
 export const CALL = 'call';
+export const ARRAY = 'array';
+export const LEFT_SQUARE_BRACKET = 'left_sq_bracket';
+export const RIGHT_SQUARE_BRACKET = 'right_sq_bracket';
+
 
 export const CALL_OPERATOR = '()';
 
 
 
-const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=,]/g
+const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=,\[\]]/g
 type Kind = string;
 type Value = string | number;
 export const Token = (kind: Kind, value: Value) => ({kind, value});
@@ -46,6 +50,7 @@ export const binaryOperators: Record<string, [number]> = {
     ',': [8],
     '()': [4],
 };
+
 
 
 function canBePostfixReceiver(token: any) {
@@ -82,6 +87,10 @@ export function tokenize(code: string) {
             kind = LEFT_PAREN;
         } else if (value == ')') {
             kind = RIGHT_PAREN;
+        } else if (value == '[' ) {
+            kind = LEFT_SQUARE_BRACKET;
+        } else if (value == ']') {
+            kind = RIGHT_SQUARE_BRACKET;
         } else if (Object.hasOwn(binaryOperators, value)) {
             kind = BINARY_OP;
         }

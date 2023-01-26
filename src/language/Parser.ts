@@ -6,6 +6,8 @@ import {
     RIGHT_BRACE,
     LEFT_PAREN,
     RIGHT_PAREN,
+    LEFT_SQUARE_BRACKET,
+    RIGHT_SQUARE_BRACKET,
     KEYWORD,
     IDENT,
     LET,
@@ -13,6 +15,7 @@ import {
     IF,
     SEMICOLON,
     LIST,
+    ARRAY,
     binaryOperators,
 } from './tokenize';
 
@@ -140,7 +143,7 @@ export class Parser {
         }
     }
     parseExpression() {
-        function applyOperator(token: any) {
+        const applyOperator = (token: any) => {
             const right = expressions.pop();
             const left = expressions.pop();
             if (token.value == ',') {
@@ -153,6 +156,12 @@ export class Parser {
                         items: [left, right],
                     });
                 }
+            } else if (token.kind == LEFT_SQUARE_BRACKET){
+                this.assert(!left, 'Assertion error: left should be undefined');
+                expressions.push({
+                    kind: ARRAY,
+                    items: right.kind == LIST? right.items : [right],
+                });
             } else {
                 expressions.push({
                     kind: token.kind,
@@ -167,19 +176,33 @@ export class Parser {
         const operators: any[] = [];
         const expressions: any[] = [];
         while (token = this.next()) {
+            const isLeftBracket = token.kind == LEFT_SQUARE_BRACKET;
+            const isRightBracket = token.kind == RIGHT_SQUARE_BRACKET;
             if (token.kind == SEMICOLON) {
                 break;
-            } if (token.kind == LEFT_PAREN) {
+            } if (token.kind == LEFT_PAREN || token.kind == LEFT_SQUARE_BRACKET) {
                 operators.push(token);
-            } else if (token.kind == RIGHT_PAREN) {
-                while (operators.length && operators.at(-1).kind !== LEFT_PAREN) {
+            } else if (token.kind == RIGHT_PAREN || isRightBracket) {
+                let counterpart = LEFT_PAREN;
+                if (isRightBracket) counterpart = LEFT_SQUARE_BRACKET;
+
+                while (operators.length && operators.at(-1).kind !== counterpart) {
                     applyOperator(operators.pop());
                 }
-                operators.pop();
+                const op = operators.pop();
+                if (op.kind == LEFT_SQUARE_BRACKET) {
+                    applyOperator(op);
+                }
             } else if (token.kind == BINARY_OP) {
                 const currentPrecedence = binaryOperators[token.value]![0];
-
-                while (operators.length && operators.at(-1).kind !== LEFT_PAREN && binaryOperators[ operators.at(-1)!.value]![0] >= currentPrecedence) {
+                const greaterPrecedence = () => {
+                    const opInfo = binaryOperators[operators.at(-1)!.value];
+                    if (opInfo) {
+                        return opInfo[0] >= currentPrecedence;
+                    }
+                    return false;
+                }
+                while (operators.length && operators.at(-1).kind !== LEFT_PAREN && greaterPrecedence()) {
                     applyOperator(operators.pop());
                 }
                 operators.push(token);

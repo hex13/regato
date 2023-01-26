@@ -1,11 +1,13 @@
 import { tokenize, 
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL,
+    LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET,
 } from '../src/language/tokenize';
 const assert = require('assert');
 test('tokenize()', () => {
     const code = `
-    for item of array {
+    let arr = [10, 20, 30];
+    for item of arr {
         await abc(10,20);
         foo.bar.baz;
 
@@ -20,10 +22,23 @@ test('tokenize()', () => {
     `;
 
     const expected =  [
+        Token(KEYWORD, 'let'),
+        Token(IDENT, 'arr'),
+        Token(BINARY_OP, '='),
+
+        Token(LEFT_SQUARE_BRACKET, '['),
+        Token(NUMBER, 10),
+        Token(BINARY_OP, ','),
+        Token(NUMBER, 20),
+        Token(BINARY_OP, ','),
+        Token(NUMBER, 30),
+        Token(RIGHT_SQUARE_BRACKET, ']'),
+        Semicolon(),
+
         Token(KEYWORD, 'for'),
         Token(IDENT , 'item'),
         Token(KEYWORD, 'of'),
-        Token(IDENT, 'array'),
+        Token(IDENT, 'arr'),
         Token(LEFT_BRACE, '{'),
     
         Token(KEYWORD, 'await'),
