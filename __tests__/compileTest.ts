@@ -261,19 +261,23 @@ it('compile function call on multiple member expressions', () => {
 });
 
 
-// TODO make it working
-xit('compile example', () => {
+it('compile example', () => {
     let ast, tokens;
+    // TODO make this compiled (keep parens in such cases):
+    // `console.log("hello " + "world " + ( 2000 + 20 + 3));`
     ast = parse(`
-        let arr = $;
-        console.log("hello " + "world");
+        console.log("hello " + "world " + 2023);
+        let arr = [10, 20, 30];
+        console.log(arr);
         for a of arr {
-            item =      2 * ( 3 + 4 * (5 + 6));
-            let foo = document.body;
+            item = a + 11;
+            console.log(item);
         }
     `, 'block');
 
     tokens = compileToTokens(ast);
     // console.log("TTTTT%%%%%", tokens)
-    fs.writeFileSync('out.js', tokens.map(t => t.value).join(' '), 'utf8',);
+    fs.writeFileSync('out.js', tokens
+        .map(t => t.kind == STRING? `"${t.value}"` : t.value)
+        .map(t => t == ';' || t == '{' || t == '}'? t + '\n': t).join(' '), 'utf8',);
 });
