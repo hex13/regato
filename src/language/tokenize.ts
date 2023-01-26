@@ -25,7 +25,7 @@ export const CALL_OPERATOR = '()';
 
 
 
-const re = /\d+\.\d+|\w+|\".*\"|\*\*|<-|<=|[{}()\-+*/<>.;=,\[\]]/g
+const re = /\d+\.\d+|\w+|\".*?\"|\*\*|<-|<=|[{}()\-+*/<>.;=,\[\]]/g
 type Kind = string;
 type Value = string | number;
 export const Token = (kind: Kind, value: Value) => ({kind, value});

@@ -17,6 +17,7 @@ test('tokenize()', () => {
             o <= c;
             "kotek + * - ";
             2**3;
+            "kot" + "pies";
         }
     }
     `;
@@ -98,6 +99,12 @@ test('tokenize()', () => {
         Token(NUMBER, 2),
         BinaryOp('**'),
         Token(NUMBER, 3),
+
+        Semicolon(),
+
+        Token(STRING, 'kot'),
+        Token(BINARY_OP, '+'),
+        Token(STRING, 'pies'),
 
         Semicolon(),
 
