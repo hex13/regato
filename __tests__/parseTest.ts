@@ -1,7 +1,7 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL, CALL_OPERATOR, ARRAY,
-    BLOCK, LET, FOR, IF, LIST,
+    BLOCK, LET, FOR, IF, LIST, VOID,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
 
@@ -220,6 +220,43 @@ it('parse commas', () => {
         ]
     });
 });
+
+it('parse function calls without arguments', () => {
+    const ast = parse('someFunc()');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: CALL_OPERATOR,
+        left: {
+            kind: IDENT, value: 'someFunc',
+        },
+        right: {
+            kind: VOID, value: '',
+        },
+    });
+});
+
+it('parse function calls as part of + expression', () => {
+    // TODO it depends on precedence of operators 
+    // and maybe we need either some additional tests for other operators
+    // or just precedence of operators should be rethought 
+    const ast = parse('someFunc() + 2');
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: '+',
+        left: {
+            kind: BINARY_OP,
+            value: CALL_OPERATOR,
+            left: {
+                kind: IDENT, value: 'someFunc',
+            },
+            right: {
+                kind: VOID, value: '',
+            },
+        },
+        right: {kind: NUMBER, value: 2},
+    });
+});
+
 
 it('parse function calls with one argument', () => {
     const ast = parse('sin(alpha)');
@@ -576,3 +613,43 @@ it('parse `if else`', () => {
 });
 
 
+it('parse `await`', () => {
+    let ast;
+    ast = parse(`await foo`);
+    expect(ast).toEqual({
+        kind: BINARY_OP,
+        value: 'await',
+        left: {
+            kind: VOID,
+            value: '',
+        },
+        right: {
+            kind: IDENT,
+            value: 'foo',
+        }
+    });
+
+    ast = parse(`await foo(1,2);`, 'block');
+    expect(ast.body[0]).toEqual({
+        kind: BINARY_OP,
+        value: 'await',
+        left: {
+            kind: VOID,
+            value: '',
+        },
+        right: {
+            kind: BINARY_OP,
+            value: CALL_OPERATOR,
+            left: {
+                kind: IDENT, value: 'foo',
+            },
+            right: {
+                kind: LIST,
+                items: [
+                    {kind: NUMBER, value: 1},
+                    {kind: NUMBER, value: 2},
+                ],
+            },
+        }
+    });
+});

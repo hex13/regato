@@ -2,7 +2,7 @@ import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN,
     LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET,
-    BINARY_OP, NUMBER, STRING, SEMICOLON,
+    BINARY_OP, NUMBER, STRING, SEMICOLON, VOID,
     BLOCK, LET, FOR, IF,
 } from '../src/language/tokenize';
 import { compileToTokens } from '../src/language/compile';
@@ -261,6 +261,22 @@ it('compile function call on multiple member expressions', () => {
 });
 
 
+it('compile `await`', () => {
+    let ast, tokens;
+    ast = parse('await foo(1)');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: VOID, value: ''},
+        {kind: BINARY_OP, value: 'await'},
+        {kind: IDENT, value: 'foo'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: NUMBER, value: 1},
+        {kind: RIGHT_PAREN, value: ')'},
+    ]);
+});
+
+
+
 it('compile example', () => {
     let ast, tokens;
     // TODO make this compiled (keep parens in such cases):
@@ -270,8 +286,9 @@ it('compile example', () => {
         let arr = [10, 20, 30];
         console.log(arr);
         for a of arr {
-            item = a + 11;
-            console.log(item);
+            let b = a + 11;
+            let a = await foo();
+            console.log(b);
         }
     `, 'block');
 

@@ -1,7 +1,7 @@
 import { tokenize, 
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL,
-    LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET,
+    LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET, VOID,
 } from '../src/language/tokenize';
 const assert = require('assert');
 test('tokenize()', () => {
@@ -18,6 +18,7 @@ test('tokenize()', () => {
             "kotek + * - ";
             2**3;
             "kot" + "pies";
+            foo();
         }
     }
     `;
@@ -42,7 +43,8 @@ test('tokenize()', () => {
         Token(IDENT, 'arr'),
         Token(LEFT_BRACE, '{'),
     
-        Token(KEYWORD, 'await'),
+        Token(VOID, ''),
+        Token(BINARY_OP, 'await'),
         Token(IDENT, 'abc'),
         Token(BINARY_OP, '()'),
         Token(LEFT_PAREN, '('),
@@ -106,6 +108,13 @@ test('tokenize()', () => {
         Token(BINARY_OP, '+'),
         Token(STRING, 'pies'),
 
+        Semicolon(),
+
+        Token(IDENT, 'foo'),
+        Token(BINARY_OP, '()'),
+        Token(LEFT_PAREN, '('),
+        Token(VOID, ''),
+        Token(RIGHT_PAREN, ')'),
         Semicolon(),
 
         Token(RIGHT_BRACE, '}'),
