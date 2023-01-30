@@ -1,7 +1,7 @@
 import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, CALL, CALL_OPERATOR, ARRAY,
-    BLOCK, LET, FOR, IF, LIST, VOID,
+    BLOCK, LET, FOR, IF, LIST, VOID, FUNCTION,
 } from '../src/language/tokenize';
 import { parse } from '../src/language/parse';
 
@@ -651,5 +651,73 @@ it('parse `await`', () => {
                 ],
             },
         }
+    });
+});
+
+
+it('parse function declaration (without params)', () => {
+    const ast = parse(`fn foo() { }`, 'block');
+    expect(ast.body[0]).toEqual({
+       kind: FUNCTION,
+       name: 'foo',
+       params: {
+            kind: VOID,
+            value: '',
+       },
+       block: {
+            kind: BLOCK,
+            body: [],
+       }
+    })
+});
+
+it('parse function declaration (with one param)', () => {
+    const ast = parse(`fn foo(a) { }`, 'block');
+    expect(ast.body[0]).toEqual({
+       kind: FUNCTION,
+       name: 'foo',
+       params: {kind: IDENT, value: 'a'},
+       block: {
+            kind: BLOCK,
+            body: [],
+       }
+    })
+});
+
+
+it('parse function declaration (with params)', () => {
+    const ast = parse(`fn foo(a, b) { }`, 'block');
+    expect(ast.body[0]).toEqual({
+       kind: FUNCTION,
+       name: 'foo',
+       params: {
+            kind: LIST,
+            items: [
+                {kind: IDENT, value: 'a'},
+                {kind: IDENT, value: 'b'},
+            ]
+       },
+       block: {
+            kind: BLOCK,
+            body: [],
+       }
+    })
+});
+
+it('parse body of function declaration', () => {
+    const ast = parse(`fn foo() { 2 + 2; bar; }`, 'block');
+    const node = ast.body[0];
+    expect(node.kind).toEqual(FUNCTION);
+    expect(node.block).toEqual({
+        kind: BLOCK,
+        body: [
+            {
+                kind: BINARY_OP,
+                value: '+',
+                left: {kind: NUMBER, value: 2},
+                right: {kind: NUMBER, value: 2},
+            },
+            {kind: IDENT, value: 'bar'},
+        ]
     });
 });

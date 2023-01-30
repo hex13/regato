@@ -276,19 +276,94 @@ it('compile `await`', () => {
 });
 
 
+const twoPlusThree = [
+    {kind: NUMBER, value: 2},
+    {kind: BINARY_OP, value: '+'},
+    {kind: NUMBER, value: 3},
+];
+
+it('compile function declaration without params', () => {
+    let ast, tokens;
+    ast = parse('fn foo() { 2 + 3; }', 'block');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: LEFT_BRACE, value: '{'},
+        {kind: KEYWORD, value: 'function'},
+        {kind: IDENT, value: 'foo'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: VOID, value: ''},
+        {kind: RIGHT_PAREN, value: ')'},
+        {kind: LEFT_BRACE, value: '{'},
+        ...twoPlusThree,
+        Semicolon(),
+        {kind: RIGHT_BRACE, value: '}'},
+        {kind: SEMICOLON, value: ';'},
+        {kind: RIGHT_BRACE, value: '}'},
+    ]);
+});
+
+it('compile function declaration with one param', () => {
+    let ast, tokens;
+    ast = parse('fn foo(bar) { 2 + 3; }', 'block');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: LEFT_BRACE, value: '{'},
+        {kind: KEYWORD, value: 'function'},
+        {kind: IDENT, value: 'foo'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: IDENT, value: 'bar'},
+        {kind: RIGHT_PAREN, value: ')'},
+        {kind: LEFT_BRACE, value: '{'},
+        ...twoPlusThree,
+        Semicolon(),
+        {kind: RIGHT_BRACE, value: '}'},
+        {kind: SEMICOLON, value: ';'},
+        {kind: RIGHT_BRACE, value: '}'},
+    ]);
+});
+
+it('compile function declaration with multiple params', () => {
+    let ast, tokens;
+    ast = parse('fn foo(bar, baz) { 2 + 3; }', 'block');
+    tokens = compileToTokens(ast);
+    expect(tokens).toEqual([
+        {kind: LEFT_BRACE, value: '{'},
+        {kind: KEYWORD, value: 'function'},
+        {kind: IDENT, value: 'foo'},
+        {kind: LEFT_PAREN, value: '('},
+        {kind: IDENT, value: 'bar'},
+        {kind: BINARY_OP, value: ','},
+        {kind: IDENT, value: 'baz'},
+        {kind: RIGHT_PAREN, value: ')'},
+        {kind: LEFT_BRACE, value: '{'},
+        ...twoPlusThree,
+        Semicolon(),
+        {kind: RIGHT_BRACE, value: '}'},
+        {kind: SEMICOLON, value: ';'},
+        {kind: RIGHT_BRACE, value: '}'},
+    ]);
+});
+
+
 
 it('compile example', () => {
     let ast, tokens;
     // TODO make this compiled (keep parens in such cases):
     // `console.log("hello " + "world " + ( 2000 + 20 + 3));`
     ast = parse(`
+        fn empty() {}
+        fn foo(a) {
+            console.log("kotek", a + 10);
+        }
         console.log("hello " + "world " + 2023);
         let arr = [10, 20, 30];
+        let arr2 = [100, 200, 300];
+        arr2.forEach(foo);
         console.log(arr);
         for a of arr {
             let b = a + 11;
-            let a = await foo();
-            console.log(b);
+            let c = foo(b);
+            console.log(c);
         }
     `, 'block');
 

@@ -16,6 +16,7 @@ import {
     SEMICOLON,
     LIST,
     ARRAY,
+    FUNCTION,
     binaryOperators,
 } from './tokenize';
 
@@ -60,6 +61,9 @@ export class Parser {
                     case 'if':
                         body.push(this.parseIf());
                         break;
+                    case 'fn':
+                        body.push(this.parseFunction());
+                        break;
                     default:
                         throw new Error(`Unexpected keyword '${nextToken.value}'.`);
                 }
@@ -100,6 +104,21 @@ export class Parser {
             kind: LET,
             name: ident.value,
             init,
+        }
+    }
+    parseFunction() {
+        this.eat('fn');
+        const ident = this.next();
+        this.assertIdentifier(ident);
+        const params = this.parseExpression();
+        this.assert(params.kind == BINARY_OP && params.value == '()', `Expected list of params but found AST node: ${JSON.stringify(params)}`);
+        this.eat('{');
+        const block = this.parseBlock();
+        return {
+            kind: FUNCTION,
+            name: ident.value,
+            params: params.right,
+            block,
         }
     }
     parseIf() {

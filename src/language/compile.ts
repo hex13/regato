@@ -2,7 +2,7 @@ import { tokenize,
     Token, Semicolon, Keyword, Ident, BinaryOp,
     KEYWORD, IDENT, LEFT_BRACE, RIGHT_BRACE, LEFT_PAREN, RIGHT_PAREN, BINARY_OP, NUMBER, STRING, SEMICOLON,
     BLOCK, LET, FOR, IF, binaryOperators,
-    CALL_OPERATOR, LIST, ARRAY, LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET,
+    CALL_OPERATOR, LIST, ARRAY, LEFT_SQUARE_BRACKET, RIGHT_SQUARE_BRACKET, FUNCTION,
 } from './tokenize';
 
 
@@ -94,6 +94,14 @@ export function compileToTokens(ast: any): any[] {
                     if (i < node.items.length - 1) tokens.push({kind: BINARY_OP, value: ','});
                 });
                 tokens.push({kind: RIGHT_SQUARE_BRACKET, value: ']'});
+                break;
+            case FUNCTION:
+                tokens.push({kind: KEYWORD, value: 'function'});
+                tokens.push({kind: IDENT, value: node.name});
+                tokens.push({kind: LEFT_PAREN, value: '('});
+                visit(node.params);
+                tokens.push({kind: RIGHT_PAREN, value: ')'});
+                visit(node.block);
                 break;
             default:
                 tokens.push({kind: node.kind, value: node.value});

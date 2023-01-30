@@ -20,6 +20,7 @@ export const ARRAY = 'array';
 export const LEFT_SQUARE_BRACKET = 'left_sq_bracket';
 export const RIGHT_SQUARE_BRACKET = 'right_sq_bracket';
 export const VOID = 'void';
+export const FUNCTION = 'function';
 
 
 
@@ -36,7 +37,7 @@ export const Keyword = (value: string) => Token(KEYWORD, value);
 export const Ident = (value: string) => Token(IDENT, value);
 export const BinaryOp = (value: string) => Token(BINARY_OP, value);
 
-export const keywords = ['if', 'for', 'let', 'of'];
+export const keywords = ['if', 'for', 'fn', 'let', 'of'];
 
 export const binaryOperators: Record<string, [number]> = {
     '.': [15],

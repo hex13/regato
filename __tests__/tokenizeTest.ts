@@ -6,6 +6,7 @@ import { tokenize,
 const assert = require('assert');
 test('tokenize()', () => {
     const code = `
+    fn someFunc() {}
     let arr = [10, 20, 30];
     for item of arr {
         await abc(10,20);
@@ -24,6 +25,15 @@ test('tokenize()', () => {
     `;
 
     const expected =  [
+        Token(KEYWORD, 'fn'),
+        Token(IDENT, 'someFunc'),
+        Token(BINARY_OP, '()'),
+        Token(LEFT_PAREN, '('),
+        Token(VOID, ''),
+        Token(RIGHT_PAREN, ')'),
+        Token(LEFT_BRACE, '{'),
+        Token(RIGHT_BRACE, '}'),
+
         Token(KEYWORD, 'let'),
         Token(IDENT, 'arr'),
         Token(BINARY_OP, '='),
