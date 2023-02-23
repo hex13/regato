@@ -12,7 +12,7 @@ export function Transform({ object, children }: TransformProps) {
         style={{position: 'absolute', transform: `translate(${~~x}px, ${~~y}px)`}}
         onClick={e => {
             const handler = object.events.click;
-            if (handler) handler(e, object)
+            if (handler) handler.call(object, e)
         }}
     >
         {children}
