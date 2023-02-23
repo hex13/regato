@@ -2,17 +2,19 @@ import React from 'react';
 import { GameObject } from '../objects';
 
 interface TransformProps {
-    object: GameObject
+    object: GameObject,
+    children: any,
 }
 
-export function Transform({ object }: TransformProps) {
+export function Transform({ object, children }: TransformProps) {
     const { x, y } = object.position;
     return <div
-        style={{width: 60, height: 60, background: 'red', position: 'absolute', transform: `translate(${~~x}px, ${~~y}px)`}}
+        style={{position: 'absolute', transform: `translate(${~~x}px, ${~~y}px)`}}
         onClick={e => {
             const handler = object.events.click;
             if (handler) handler(e, object)
         }}
     >
+        {children}
     </div>
 }
