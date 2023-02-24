@@ -36,6 +36,25 @@ function dispatch(e: any, object: GameObject ) {
 
 export function Content() {
     const [objects, setObjects] = React.useState(initialObjects);
+    const move = (a) => {
+        setObjects(objects => {
+            const v = objects[0]!.velocity;
+            let multiplier = 1;
+            if (Math.sign(a.x) != Math.sign(v.x)) {
+                multiplier = 0.3;
+            }
+            return [{...objects[0]!, velocity: {x: v.x * multiplier + a.x, y: v.y * multiplier + a.y }}, ...objects.slice(1)]
+        });
+    }
+    React.useEffect(() => {
+        document.addEventListener('keydown', e => {
+            if (e.code == 'ArrowLeft') {
+                move({x: -0.3, y: 0});
+            } else if (e.code == 'ArrowRight') {
+                move({x: 0.3, y: 0});
+            }
+        })
+    }, []);
     useInterval(() => {
         setObjects(objects => objects.map(o => {
             let velocity: {x: number, y: number};
