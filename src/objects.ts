@@ -6,4 +6,6 @@ export type GameObject = {
     events: Record<string, (e: any, self: GameObject) => void>;
     eventCodes: Record<string, string>;
     id: number;
+    size: {x: number, y: number},
+    static?: boolean,
 }

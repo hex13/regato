@@ -7,8 +7,8 @@ interface ObjectLayerProps {
 }
 
 const gameObjectComponents: Record<string, (props: any) => React.ReactElement> = {
-    Rectangle: () => <div style={{width: 60, height: 60,  border: '1px solid red'}} />,
-    Circle: () => <div style={{borderRadius: '50%', width: 60, height: 60, border: '1px solid red'}} />,
+    Rectangle: ({ object }) => <div style={{width: object.size.x, height: object.size.y,  border: '1px solid red'}} />,
+    Circle: ({ object }) => <div style={{borderRadius: '50%', width: object.size.x, height: object.size.y, border: '1px solid red'}} />,
     Default: () => <div>???</div>,
 }
 
