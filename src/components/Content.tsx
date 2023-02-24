@@ -47,14 +47,20 @@ export function Content() {
         });
     }
     React.useEffect(() => {
-        document.addEventListener('keydown', e => {
+        const h = e => {
             if (e.code == 'ArrowLeft') {
                 move({x: -0.3, y: 0});
             } else if (e.code == 'ArrowRight') {
                 move({x: 0.3, y: 0});
+            } else  if (e.code == 'ArrowUp') {
+                    move({x: 0, y: -3});
             }
-        })
-    }, []);
+        }
+        document.addEventListener('keydown', h);
+        return () => {
+            document.removeEventListener('keydown', h);
+        }
+    }, [objects]);
     useInterval(() => {
         setObjects(objects => objects.map(o => {
             let velocity: {x: number, y: number};
