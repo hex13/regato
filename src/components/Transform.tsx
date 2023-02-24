@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { GameObject } from '../objects';
+import { Dispatcher } from './Dispatcher';
 
 interface TransformProps {
     object: GameObject,
@@ -8,12 +9,13 @@ interface TransformProps {
 
 export function Transform({ object, children }: TransformProps) {
     const { x, y } = object.position;
+    const dispatch = useContext(Dispatcher);
+    const handleEvent = (e: any) => {
+        dispatch(e, object);
+    };
     return <div
         style={{position: 'absolute', transform: `translate(${~~x}px, ${~~y}px)`}}
-        onClick={e => {
-            const handler = object.events.click;
-            if (handler) handler.call(object, e)
-        }}
+        onClick={handleEvent}
     >
         {children}
     </div>

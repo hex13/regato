@@ -5,6 +5,7 @@ import { useInterval } from './helpers';
 import { ObjectLayer } from './ObjectLayer';
 import { CommandEditor } from './CommandEditor';
 import { runCommands, parseCommands } from '../commands';
+import { Dispatcher } from './Dispatcher';
 
 const initialObjects: Array<GameObject> = [
     {kind: 'Rectangle', id: 1, position: {x: 100, y: 200}, velocity: {x: 0, y: 0}, events: {
@@ -22,6 +23,11 @@ const initialObjects: Array<GameObject> = [
     {kind: 'Circle', id: 3, position: {x: 200, y: 300}, velocity: {x: -0.5, y: -0.5}, events: {}, eventCodes: {}},
 ];
 
+function dispatch(e: any, object: GameObject ) {
+    console.log(`event ${e.type}@${object.kind}#${object.id}`);
+    const handler = object.events.click;
+    if (handler) handler.call(object, e)
+}
 export function Content() {
     const [objects, setObjects] = React.useState(initialObjects);
     useInterval(() => {
@@ -29,7 +35,9 @@ export function Content() {
     }, 16);
 
     return <>
-        <ObjectLayer objects={objects}/>
-        <CommandEditor object={objects[0] as GameObject}/>
+        <Dispatcher.Provider value={dispatch}>
+            <ObjectLayer objects={objects}/>
+            <CommandEditor object={objects[0] as GameObject}/>
+        </Dispatcher.Provider>
     </>
 }
