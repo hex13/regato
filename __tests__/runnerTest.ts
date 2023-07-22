@@ -1,6 +1,6 @@
 
 import { parse } from '../src/language/parse';
-import { run } from '../src/language/runner';
+import { run, Context } from '../src/language/runner';
 import { AstNode } from '../src/language/ast';
 
 it('interpret number', () => {
@@ -35,3 +35,10 @@ it('interpret binary op /', () => {
     expect(result).toEqual(4);
 });
 
+it('interpret function call', () => {
+    const ast: AstNode = parse('foo(10)');
+    const result = run(ast, new Context({
+        foo: (x: number) => x + 123,
+    }));
+    expect(result).toEqual(133);
+});
