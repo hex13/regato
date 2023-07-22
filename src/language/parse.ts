@@ -2,8 +2,9 @@ import {
     tokenize,
 } from './tokenize';
 import { Parser } from './Parser';
+import { AstNode } from './ast';
 
-export function parseTokens(tokens: any[], context: string) {
+export function parseTokens(tokens: any[], context: string): AstNode {
     const parser = new Parser(tokens);
     switch (context) {
         case 'block':
@@ -14,7 +15,7 @@ export function parseTokens(tokens: any[], context: string) {
     }
 }
 
-export function parse(code: string, context: string = 'expr') {
+export function parse(code: string, context: string = 'expr'): AstNode {
     const tokens = tokenize(code);
     return parseTokens(tokens, context);
 }

@@ -19,6 +19,7 @@ import {
     FUNCTION,
     binaryOperators,
 } from './tokenize';
+import { AstNode } from './ast';
 
 export class Parser {
     tokens: any[];
@@ -43,7 +44,7 @@ export class Parser {
             throw new Error(`Syntax error. Expected '${value}' but found '${token.value}'`);
         }
     }
-    parseBlock(): any {
+    parseBlock(): AstNode {
         const body = [];
         while (!this.end() && this.peek().kind != RIGHT_BRACE) {
             const nextToken = this.peek();
@@ -161,7 +162,7 @@ export class Parser {
             block,
         }
     }
-    parseExpression() {
+    parseExpression(): AstNode {
         const applyOperator = (token: any) => {
             const right = expressions.pop();
             const left = expressions.pop();
