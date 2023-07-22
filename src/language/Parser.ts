@@ -22,8 +22,8 @@ import {
 import { AstNode } from './ast';
 
 export class Parser {
-    tokens: any[];
-    constructor(tokens: any[]) {
+    tokens: AstNode[];
+    constructor(tokens: AstNode[]) {
         this.tokens = [...tokens];
     }
     next() {
@@ -46,8 +46,8 @@ export class Parser {
     }
     parseBlock(): AstNode {
         const body = [];
-        while (!this.end() && this.peek().kind != RIGHT_BRACE) {
-            const nextToken = this.peek();
+        while (!this.end() && this.peek()!.kind != RIGHT_BRACE) {
+            const nextToken = this.peek()!;
             if (nextToken.kind == LEFT_BRACE) {
                 this.next();
                 body.push(this.parseBlock());
@@ -72,7 +72,7 @@ export class Parser {
                 body.push(this.parseExpression());
             }
         }
-        if (this.peek()  && this.peek().kind == RIGHT_BRACE) {
+        if (this.peek()  && this.peek()!.kind == RIGHT_BRACE) {
             this.next();
         }
         return {
@@ -88,11 +88,11 @@ export class Parser {
     assertIdentifier(ident: any) {
         this.assert(ident.kind === IDENT, 'Syntax error: expected identifier. found ' + ident.value);
     }
-    parseLet() {
+    parseLet(): AstNode {
         this.eat('let');
-        const ident = this.next();
+        const ident = this.next()!;
         this.assertIdentifier(ident);
-        const nextToken = this.peek();
+        const nextToken = this.peek()!;
         let init;
         if (nextToken.kind == BINARY_OP && nextToken.value == '=') {
             this.next();
@@ -109,7 +109,7 @@ export class Parser {
     }
     parseFunction() {
         this.eat('fn');
-        const ident = this.next();
+        const ident = this.next()!;
         this.assertIdentifier(ident);
         const params = this.parseExpression();
         this.assert(params.kind == BINARY_OP && params.value == '()', `Expected list of params but found AST node: ${JSON.stringify(params)}`);
@@ -144,7 +144,7 @@ export class Parser {
     parseFor() {
         this.eat('for');
 
-        const ident = this.next();
+        const ident = this.next()!;
         this.assertIdentifier(ident);
         const item = ident.value;
 
@@ -230,7 +230,7 @@ export class Parser {
                 expressions.push(token);
             }
 
-            if (this.peek() && this.peek().kind == LEFT_BRACE) {
+            if (this.peek() && this.peek()!.kind == LEFT_BRACE) {
                 break;
             }
         }

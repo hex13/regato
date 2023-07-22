@@ -26,12 +26,12 @@ export const FUNCTION = 'function';
 
 export const CALL_OPERATOR = '()';
 
-
+import { AstNode } from './ast';
 
 const re = /\d+\.\d+|\w+|\".*?\"|\*\*|<-|<=|[{}()\-+*/<>.;=,\[\]]/g
 type Kind = string;
 type Value = string | number;
-export const Token = (kind: Kind, value: Value) => ({kind, value});
+export const Token = (kind: Kind, value: Value): AstNode => ({kind, value});
 export const Semicolon = () => Token(SEMICOLON, ';');
 export const Keyword = (value: string) => Token(KEYWORD, value);
 export const Ident = (value: string) => Token(IDENT, value);
@@ -62,8 +62,8 @@ function canBePostfixReceiver(token: any) {
     return token.kind == IDENT;
 }
 
-export function tokenize(code: string) {
-    const tokens: any[] = [];
+export function tokenize(code: string): AstNode[] {
+    const tokens: AstNode[] = [];
     Array.from(code.matchAll(re)).forEach((match: any) => {
         const prev = tokens.at(-1);
         let value = match[0];

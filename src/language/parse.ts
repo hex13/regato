@@ -4,7 +4,7 @@ import {
 import { Parser } from './Parser';
 import { AstNode } from './ast';
 
-export function parseTokens(tokens: any[], context: string): AstNode {
+export function parseTokens(tokens: AstNode[], context: string): AstNode {
     const parser = new Parser(tokens);
     switch (context) {
         case 'block':
