@@ -42,3 +42,38 @@ it('interpret function call', () => {
     }));
     expect(result).toEqual(133);
 });
+
+it('interpret member expression', () => {
+    const ast: AstNode = parse('foo.bar');
+    const result = run(ast, new Context({
+        foo: {
+            bar: 8
+        }
+    }));
+    expect(result).toEqual(8);
+});
+
+it('interpret member expression (recursive)', () => {
+    const ast: AstNode = parse('foo.bar.baz');
+    const result = run(ast, new Context({
+        foo: {
+            bar: {
+                baz: 1234,
+            }
+        }
+    }));
+    expect(result).toEqual(1234);
+});
+
+
+it('interpret larger expression', () => {
+    const ast: AstNode = parse('foo.bar.baz + 10 * 2 + 1');
+    const result = run(ast, new Context({
+        foo: {
+            bar: {
+                baz: 1234,
+            }
+        }
+    }));
+    expect(result).toEqual(1255);
+});
