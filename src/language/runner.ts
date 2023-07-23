@@ -8,6 +8,9 @@ const binaryOperators: Record<string, (a: any, b: any, ctx?: any) => any> = {
     '*': (a: any, b: any) => a * b,
     '/': (a: any, b: any) => a / b,
     [CALL_OPERATOR]: (left, right, ctx) => {
+        if (Array.isArray(right)) {
+            return left(...right);
+        }
         return left(right);
     },
     '.': (left, right, ctx) => {
@@ -56,6 +59,9 @@ export function run(node: AstNode, ctx?: Context): any {
             if (!(parent.kind == 'binaryop' && parent.value == '.')) {
                 result = ctx?.get(node.value);
             }
+            break;
+        case 'list':
+            result = node.items.map((item: any) => run(item, ctx));
             break;
     }
     if (ctx) ctx.parents.pop();

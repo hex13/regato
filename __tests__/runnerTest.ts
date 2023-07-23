@@ -35,12 +35,21 @@ it('interpret binary op /', () => {
     expect(result).toEqual(4);
 });
 
-it('interpret function call', () => {
+it('interpret function call with one argument', () => {
     const ast: AstNode = parse('foo(10)');
     const result = run(ast, new Context({
         foo: (x: number) => x + 123,
     }));
     expect(result).toEqual(133);
+});
+
+it('interpret function call with multiple arguments', () => {
+    const ast: AstNode = parse('foo(bar, 3)');
+    const result = run(ast, new Context({
+        foo: (x: number, y: number) => x + y + 10,
+        bar: 200,
+    }));
+    expect(result).toEqual(213);
 });
 
 it('interpret member expression', () => {
