@@ -53,6 +53,16 @@ it('interpret member expression', () => {
     expect(result).toEqual(8);
 });
 
+it('interpret method call (member expression + function call)', () => {
+    const ast: AstNode = parse('foo.bar(10)');
+    const result = run(ast, new Context({
+        foo: {
+            bar: (x: number) => x + 100,
+        }
+    }));
+    expect(result).toEqual(110);
+});
+
 it('interpret member expression (recursive)', () => {
     const ast: AstNode = parse('foo.bar.baz');
     const result = run(ast, new Context({
