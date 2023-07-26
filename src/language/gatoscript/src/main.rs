@@ -18,7 +18,7 @@ const precedence: [(&str, i32); 4] = [
 
 fn get_precedence(op: &Node) -> i32 {
     for (s, prec) in precedence {
-        if op.value == s {
+        if op.text() == s {
             return prec;
         }
     }
@@ -34,6 +34,9 @@ struct Node {
 impl Node {
     fn new(kind: Kind, value: String) -> Node {
         Node { kind, value }
+    }
+    fn text(&self) -> &str {
+        &self.value
     }
 }
 
@@ -114,16 +117,16 @@ fn run(program: &Vec<&Node>) {
     let mut stack: Vec<f32> = vec![];
     for node in program {
         if node.kind == Kind::Number {
-            stack.push(node.value.parse::<f32>().unwrap());
+            stack.push(node.text().parse::<f32>().unwrap());
         } else if node.kind == Kind::Operator {
             let b = stack.pop().unwrap();
             let a = stack.pop().unwrap();
-            let result = match node.value.as_str() {
+            let result = match node.text() {
                 "+" => a + b,
                 "-" => a - b,
                 "*" => a * b,
                 "/" => a / b,
-                _ => panic!("uknown operator `{}`", node.value),
+                _ => panic!("uknown operator `{}`", node.text()),
             };
             stack.push(result);
         }
