@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(PartialEq, Debug, Copy, Clone)]
 enum Kind {
     Default,
@@ -9,7 +11,7 @@ enum Kind {
     RightParenthesis,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Value {
     Float(f32),
     String(String),
@@ -33,7 +35,7 @@ fn get_precedence(op: &Node) -> i32 {
     return 0;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Node {
     kind: Kind,
     value: Value,
@@ -41,7 +43,7 @@ struct Node {
 
 impl Node {
     fn new(kind: Kind, value: Value) -> Node {
-        Node { kind, value }
+        Node { kind, value: value.clone() }
     }
     fn text(&self) -> &str {
         if let Value::String(text) = &self.value {
@@ -125,7 +127,8 @@ fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
     out
 }
 
-fn run(program: &Vec<&Node>) {
+type Builtins = HashMap<&'static str, Box<dyn Fn(f32) -> f32>>;
+fn run(program: &Vec<&Node>, builtins: &Builtins) {
     let mut stack: Vec<Value> = vec![];
     for node in program {
         if node.kind == Kind::Number {
@@ -147,24 +150,54 @@ fn run(program: &Vec<&Node>) {
                         Value::Float(0.0)
                     }
                 },
+                "()" => {
+                    if let Value::String(func_name) = a {
+                        let func = builtins.get(func_name.as_str()).unwrap();
+                        if let Value::Float(arg) = b {
+                            Value::Float(func(arg))
+                        } else {
+                            Value::Float(0.0)
+                        }
+                    } else {
+                        Value::Float(0.0)
+                    }
+                }
                 _ => panic!("uknown operator `{}`", node.text()),
             };
             stack.push(result);
+        } else {
+            stack.push(node.value.clone());
         }
+
         println!("{:?}", node);
-        
     }
-    println!("= {}", stack[0]);
+    println!("= {:?}", stack[0]);
 
 }
 
 fn main() {
-    let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
+
+    let mut builtins: Builtins = HashMap::new();
+
+    builtins.insert("ten", Box::new(|x: f32| {
+        x * 10.0
+    }));
+
+    builtins.insert("hundred", Box::new(|x: f32| {
+        x * 100.0
+    }));
+
+    // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
+    let code = "ten(3) + 3 + hundred(2)";
     // let code = "foo123(abc, 12 + 11) 3 * ( 4 + 7 ) ";
     let tokens = tokenize(code);
     println!("tokens = {:?}", tokens);
     let program = parse(&tokens);
     println!("PROGRAM = \n");
-    run(&program);
+    for node in &program {
+        println!("= {:?}", node);
+    }
+
+    run(&program, &builtins);
 
 }
