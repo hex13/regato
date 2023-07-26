@@ -15,6 +15,7 @@ enum Kind {
 enum Value {
     Float(f32),
     String(String),
+    List(Vec<Value>)
 }
 
 struct ArgList {
@@ -32,7 +33,8 @@ impl ArgList {
 }
 
 
-const precedence: [(&str, i32); 5] = [
+const precedence: [(&str, i32); 6] = [
+    (",", 4),
     ("+", 10),
     ("-", 10),
     ("*", 20),
@@ -164,10 +166,22 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) {
                         Value::Float(0.0)
                     }
                 },
+                "," => {
+                    if let Value::List(mut list) = b {
+                        list.insert(0, a);
+                        Value::List(list)
+                    } else {
+                        Value::List(vec![a, b])
+                    }
+                }
                 "()" => {
                     if let Value::String(func_name) = a {
                         let func = builtins.get(func_name.as_str()).unwrap();
-                        func(&ArgList { data: vec![b] })
+                        if let Value::List(args) = b {
+                            func(&ArgList { data: args })
+                        } else {
+                            func(&ArgList { data: vec![b] })
+                        }
                     } else {
                         Value::Float(0.0)
                     }
@@ -196,9 +210,14 @@ fn main() {
     builtins.insert("hundred", Box::new(|args: &ArgList| {
         Value::Float(args.get_float(0).unwrap() * 100.0)
     }));
+    builtins.insert("add", Box::new(|args: &ArgList| {
+        Value::Float(args.get_float(0).unwrap() + args.get_float(1).unwrap() + args.get_float(2).unwrap())
+    }));
+
 
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
-    let code = "ten(3) + 3 + hundred(2)";
+    // let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
+    let code = "add(50,1, 13) + hundred(30)";
     // let code = "foo123(abc, 12 + 11) 3 * ( 4 + 7 ) ";
     let tokens = tokenize(code);
     println!("tokens = {:?}", tokens);
