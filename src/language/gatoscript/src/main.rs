@@ -9,11 +9,12 @@ enum Kind {
     RightParenthesis,
 }
 
-const precedence: [(&str, i32); 4] = [
+const precedence: [(&str, i32); 5] = [
     ("+", 10),
     ("-", 10),
     ("*", 20),
     ("/", 20),
+    ("()", 100),
 ];
 
 fn get_precedence(op: &Node) -> i32 {
