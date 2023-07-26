@@ -9,6 +9,13 @@ enum Kind {
     RightParenthesis,
 }
 
+#[derive(Debug)]
+enum Value {
+    Float(f32),
+    String(String),
+}
+
+
 const precedence: [(&str, i32); 5] = [
     ("+", 10),
     ("-", 10),
@@ -29,15 +36,19 @@ fn get_precedence(op: &Node) -> i32 {
 #[derive(Debug)]
 struct Node {
     kind: Kind,
-    value: String,
+    value: Value,
 }
 
 impl Node {
-    fn new(kind: Kind, value: String) -> Node {
+    fn new(kind: Kind, value: Value) -> Node {
         Node { kind, value }
     }
     fn text(&self) -> &str {
-        &self.value
+        if let Value::String(text) = &self.value {
+            text
+        } else {
+            ""
+        }
     }
 }
 
@@ -68,9 +79,9 @@ fn tokenize(code: &str) -> Vec<Node> {
         if state != Kind::Default {
             if state != kind {
                 if state == Kind::LeftParenthesis && prev_state == Kind::Identifier {
-                    tokens.push(Node::new(Kind::Operator, "()".to_string()));
+                    tokens.push(Node::new(Kind::Operator, Value::String("()".to_string())));
                 }
-                tokens.push(Node::new(state, code[start..i].to_string()));
+                tokens.push(Node::new(state, Value::String(code[start..i].to_string())));
                 prev_state = state;
                 state = Kind::Default;
             }
