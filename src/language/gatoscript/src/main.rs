@@ -126,18 +126,27 @@ fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
 }
 
 fn run(program: &Vec<&Node>) {
-    let mut stack: Vec<f32> = vec![];
+    let mut stack: Vec<Value> = vec![];
     for node in program {
         if node.kind == Kind::Number {
-            stack.push(node.text().parse::<f32>().unwrap());
+            stack.push(Value::Float(node.text().parse::<f32>().unwrap()));
         } else if node.kind == Kind::Operator {
             let b = stack.pop().unwrap();
             let a = stack.pop().unwrap();
             let result = match node.text() {
-                "+" => a + b,
-                "-" => a - b,
-                "*" => a * b,
-                "/" => a / b,
+                op @ ("+" | "-" | "*" | "/") => {
+                    if let (Value::Float(a), Value::Float(b)) = (a, b) {
+                        Value::Float(match op {
+                            "+" => a + b,
+                            "-" => a - b,
+                            "*" => a * b,
+                            "/" => a / b,
+                            _ => 0.0
+                        })
+                    } else {
+                        Value::Float(0.0)
+                    }
+                },
                 _ => panic!("uknown operator `{}`", node.text()),
             };
             stack.push(result);
