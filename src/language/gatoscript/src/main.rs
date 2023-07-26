@@ -17,6 +17,10 @@ enum Value {
     String(String),
 }
 
+struct ArgList {
+    data: Vec<Value>,
+}
+
 
 const precedence: [(&str, i32); 5] = [
     ("+", 10),
@@ -127,7 +131,7 @@ fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
     out
 }
 
-type Builtins = HashMap<&'static str, Box<dyn Fn(f32) -> f32>>;
+type Builtins = HashMap<&'static str, Box<dyn Fn(&ArgList) -> Value>>;
 fn run(program: &Vec<&Node>, builtins: &Builtins) {
     let mut stack: Vec<Value> = vec![];
     for node in program {
@@ -153,11 +157,7 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) {
                 "()" => {
                     if let Value::String(func_name) = a {
                         let func = builtins.get(func_name.as_str()).unwrap();
-                        if let Value::Float(arg) = b {
-                            Value::Float(func(arg))
-                        } else {
-                            Value::Float(0.0)
-                        }
+                        func(&ArgList { data: vec![b] })
                     } else {
                         Value::Float(0.0)
                     }
@@ -179,12 +179,20 @@ fn main() {
 
     let mut builtins: Builtins = HashMap::new();
 
-    builtins.insert("ten", Box::new(|x: f32| {
-        x * 10.0
+    builtins.insert("ten", Box::new(|args: &ArgList| {
+        if let Value::Float(x) = args.data[0] {
+            Value::Float(x * 10.0)
+        } else {
+            Value::Float(0.0)
+        }
     }));
 
-    builtins.insert("hundred", Box::new(|x: f32| {
-        x * 100.0
+    builtins.insert("hundred", Box::new(|args: &ArgList| {
+        if let Value::Float(x) = args.data[0] {
+            Value::Float(x * 100.0)
+        } else {
+            Value::Float(0.0)
+        }
     }));
 
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
