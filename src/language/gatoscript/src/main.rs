@@ -21,6 +21,16 @@ struct ArgList {
     data: Vec<Value>,
 }
 
+impl ArgList {
+    fn get_float(&self, idx: usize) -> Option<f32> {
+        if let Value::Float(x) = self.data[idx] {
+            Some(x)
+        } else {
+            None
+        }
+    }
+}
+
 
 const precedence: [(&str, i32); 5] = [
     ("+", 10),
@@ -180,19 +190,11 @@ fn main() {
     let mut builtins: Builtins = HashMap::new();
 
     builtins.insert("ten", Box::new(|args: &ArgList| {
-        if let Value::Float(x) = args.data[0] {
-            Value::Float(x * 10.0)
-        } else {
-            Value::Float(0.0)
-        }
+        Value::Float(args.get_float(0).unwrap() * 10.0)
     }));
 
     builtins.insert("hundred", Box::new(|args: &ArgList| {
-        if let Value::Float(x) = args.data[0] {
-            Value::Float(x * 100.0)
-        } else {
-            Value::Float(0.0)
-        }
+        Value::Float(args.get_float(0).unwrap() * 100.0)
     }));
 
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
