@@ -99,7 +99,7 @@ fn tokenize(code: &str) -> Vec<Node> {
 
 fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
     let mut out: Vec<&Node> = vec![];
-    let apply_operator = |op| {
+    let mut apply_operator = |op| {
         out.push(op);
     };
     let mut opStack: Vec<&Node> = vec![];
@@ -108,22 +108,22 @@ fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
             opStack.push(token);
         } else if token.kind == Kind::RightParenthesis {
             while opStack.len() > 0 && opStack.last().unwrap().kind != Kind::LeftParenthesis {
-                out.push(opStack.pop().unwrap());
+                apply_operator(opStack.pop().unwrap());
             }
             opStack.pop(); // left parenthesis
         } else if token.kind == Kind::Operator {
             while opStack.len() > 0 && get_precedence(&opStack.last().unwrap()) > get_precedence(&token) {
-                out.push(opStack.pop().unwrap());
+                apply_operator(opStack.pop().unwrap());
             }
             opStack.push(&token);
         } else {
-            out.push(&token);
+            apply_operator(&token);
         }
     }
     while let Some(op) = opStack.pop() {
-        out.push(op);
+        apply_operator(op);
     }
-    
+
     out
 }
 
