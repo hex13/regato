@@ -172,7 +172,7 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) {
                         Value::Float(0.0)
                     }
                 }
-                _ => panic!("uknown operator `{}`", node.text()),
+                _ => panic!("unknown operator `{}`", node.text()),
             };
             stack.push(result);
         } else {
