@@ -24,10 +24,17 @@ fn get_precedence(op: &Node) -> i32 {
     }
     return 0;
 }
+
 #[derive(Debug)]
 struct Node {
     kind: Kind,
     value: String,
+}
+
+impl Node {
+    fn new(kind: Kind, value: String) -> Node {
+        Node { kind, value }
+    }
 }
 
 fn tokenize(code: &str) -> Vec<Node> {
@@ -57,9 +64,9 @@ fn tokenize(code: &str) -> Vec<Node> {
         if state != Kind::Default {
             if state != kind {
                 if state == Kind::LeftParenthesis && prev_state == Kind::Identifier {
-                    tokens.push(Node { kind: Kind::Call, value: "()".to_string()});
+                    tokens.push(Node::new(Kind::Operator, "()".to_string()));
                 }
-                tokens.push(Node { kind: state, value: code[start..i].to_string()});
+                tokens.push(Node::new(state, code[start..i].to_string()));
                 prev_state = state;
                 state = Kind::Default;
             }
