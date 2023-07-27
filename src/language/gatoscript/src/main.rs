@@ -11,7 +11,7 @@ enum Kind {
     RightParenthesis,
 }
 
-#[derive(Debug, Clone)]
+#[derive(PartialEq, Debug, Clone)]
 enum Value {
     Float(f32),
     String(String),
@@ -128,7 +128,7 @@ fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
             }
             opStack.pop(); // left parenthesis
         } else if token.kind == Kind::Operator {
-            while opStack.len() > 0 && get_precedence(&opStack.last().unwrap()) > get_precedence(&token) {
+            while opStack.len() > 0 && get_precedence(&opStack.last().unwrap()) >= get_precedence(&token) {
                 apply_operator(opStack.pop().unwrap());
             }
             opStack.push(&token);
@@ -144,7 +144,7 @@ fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
 }
 
 type Builtins = HashMap<&'static str, Box<dyn Fn(&ArgList) -> Value>>;
-fn run(program: &Vec<&Node>, builtins: &Builtins) {
+fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
     let mut stack: Vec<Value> = vec![];
     for node in program {
         if node.kind == Kind::Number {
@@ -167,8 +167,8 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) {
                     }
                 },
                 "," => {
-                    if let Value::List(mut list) = b {
-                        list.insert(0, a);
+                    if let Value::List(mut list) = a {
+                        list.push(b);
                         Value::List(list)
                     } else {
                         Value::List(vec![a, b])
@@ -196,6 +196,7 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) {
         println!("{:?}", node);
     }
     println!("= {:?}", stack[0]);
+    stack[0].clone()
 
 }
 
@@ -218,6 +219,8 @@ fn main() {
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
     // let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
     let code = "add(50,1, 13) + hundred(30)";
+    // let code = "50,1, 13";
+    // let code = "ten(2) + hundred(30)";
     // let code = "foo123(abc, 12 + 11) 3 * ( 4 + 7 ) ";
     let tokens = tokenize(code);
     println!("tokens = {:?}", tokens);
@@ -229,4 +232,19 @@ fn main() {
 
     run(&program, &builtins);
 
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn parse_expression_with_left_associativity() {
+        let mut builtins: Builtins = HashMap::new();
+        let code = "2 - 5 + 1";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::Float(-2.0));
+    }
 }
