@@ -33,8 +33,9 @@ impl ArgList {
 }
 
 
-const precedence: [(&str, i32); 6] = [
+const precedence: [(&str, i32); 7] = [
     (",", 4),
+    (".", 6),
     ("+", 10),
     ("-", 10),
     ("*", 20),
@@ -88,7 +89,7 @@ fn tokenize(code: &str) -> Vec<Node> {
             '0'..='9' if state != Kind::Identifier => Kind::Number,
             '0'..='9' if state == Kind::Identifier => Kind::Identifier,
             'a'..='z' | 'A'..='Z' => Kind::Identifier,
-            '+' | '-' | '*' | '/' | ',' => Kind::Operator,
+            '+' | '-' | '*' | '/' | ',' | '.' => Kind::Operator,
             '(' => Kind::LeftParenthesis,
             ')' => Kind::RightParenthesis,
             _ => Kind::Default,
@@ -174,6 +175,15 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                         Value::List(vec![a, b])
                     }
                 }
+                "." => {
+                    if let (Value::String(a), Value::String(b)) = (a, b) {
+                        // TODO make this work for real
+                        let s = a + "->" + &b;
+                        Value::String(s) 
+                    } else {
+                        Value::Float(0.0)
+                    }
+                }
                 "()" => {
                     if let Value::String(func_name) = a {
                         let func = builtins.get(func_name.as_str()).unwrap();
@@ -218,17 +228,19 @@ fn main() {
 
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
     // let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
-    let code = "add(50,1, 13) + hundred(30)";
+    // let code = "add(50,1, 13) + hundred(30)";
+    let code = "foo.bar.baz";
     // let code = "50,1, 13";
     // let code = "ten(2) + hundred(30)";
     // let code = "foo123(abc, 12 + 11) 3 * ( 4 + 7 ) ";
     let tokens = tokenize(code);
     println!("tokens = {:?}", tokens);
     let program = parse(&tokens);
-    println!("PROGRAM = \n");
+    println!("\nPROGRAM");
     for node in &program {
-        println!("= {:?}", node);
+        println!("instr: {:?}", node);
     }
+    println!("END PROGRAM");
 
     run(&program, &builtins);
 
@@ -247,4 +259,15 @@ mod tests {
         let value = run(&program, &builtins);
         assert_eq!(value, Value::Float(-2.0));
     }
+    #[test]
+    fn parse_member_expression() {
+        let mut builtins: Builtins = HashMap::new();
+        let code = "foo.bar.baz";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        // TODO make this work for real
+        assert_eq!(value, Value::String("foo->bar->baz".to_string()));
+    }
+
 }
