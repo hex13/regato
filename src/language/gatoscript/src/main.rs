@@ -15,7 +15,8 @@ enum Kind {
 enum Value {
     Float(f32),
     String(String),
-    List(Vec<Value>)
+    List(Vec<Value>),
+    Function(fn(ArgList) -> Value),
 }
 
 struct ArgList {
@@ -70,6 +71,8 @@ impl Node {
         }
     }
 }
+
+type Builtins = HashMap<&'static str, Value>;
 
 fn tokenize(code: &str) -> Vec<Node> {
     let mut state = Kind::Default;
@@ -144,7 +147,6 @@ fn parse(tokens: &Vec<Node>) -> Vec<&Node> {
     out
 }
 
-type Builtins = HashMap<&'static str, Box<dyn Fn(&ArgList) -> Value>>;
 fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
     let mut stack: Vec<Value> = vec![];
     for node in program {
@@ -186,11 +188,14 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                 }
                 "()" => {
                     if let Value::String(func_name) = a {
-                        let func = builtins.get(func_name.as_str()).unwrap();
-                        if let Value::List(args) = b {
-                            func(&ArgList { data: args })
+                        if let Value::Function(func) = builtins.get(func_name.as_str()).unwrap() {
+                            if let Value::List(args) = b {
+                                func(ArgList { data: args })
+                            } else {
+                                func(ArgList { data: vec![b] })
+                            }
                         } else {
-                            func(&ArgList { data: vec![b] })
+                            Value::Float(0.0)
                         }
                     } else {
                         Value::Float(0.0)
@@ -210,26 +215,32 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
 
 }
 
+
+fn builtin_ten(args: ArgList) -> Value {
+    Value::Float(args.get_float(0).unwrap() * 10.0)
+}
+
+
+fn builtin_hundred(args: ArgList) -> Value {
+    Value::Float(args.get_float(0).unwrap() * 100.0)
+}
+
+
 fn main() {
 
     let mut builtins: Builtins = HashMap::new();
 
-    builtins.insert("ten", Box::new(|args: &ArgList| {
-        Value::Float(args.get_float(0).unwrap() * 10.0)
-    }));
+    builtins.insert("ten", Value::Function(builtin_ten));
+    builtins.insert("hundred", Value::Function(builtin_hundred));
 
-    builtins.insert("hundred", Box::new(|args: &ArgList| {
-        Value::Float(args.get_float(0).unwrap() * 100.0)
-    }));
-    builtins.insert("add", Box::new(|args: &ArgList| {
+    builtins.insert("add", Value::Function(|args: ArgList| {
         Value::Float(args.get_float(0).unwrap() + args.get_float(1).unwrap() + args.get_float(2).unwrap())
     }));
 
-
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
-    // let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
+    let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
     // let code = "add(50,1, 13) + hundred(30)";
-    let code = "foo.bar.baz";
+    // let code = "foo.bar.baz";
     // let code = "50,1, 13";
     // let code = "ten(2) + hundred(30)";
     // let code = "foo123(abc, 12 + 11) 3 * ( 4 + 7 ) ";
