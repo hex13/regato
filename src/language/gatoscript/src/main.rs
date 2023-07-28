@@ -118,6 +118,7 @@ fn tokenize(code: &str) -> Vec<Node> {
     }
     
     let mut chars = code.chars();
+    let mut part = 0;
     for i in 0..code.len() + 1 {
         let ch = chars.next().unwrap_or(' ');
         next_token(i, ch);
@@ -125,6 +126,10 @@ fn tokenize(code: &str) -> Vec<Node> {
             '0'..='9' if state != Kind::Identifier => Kind::Number,
             '0'..='9' if state == Kind::Identifier => Kind::Identifier,
             'a'..='z' | 'A'..='Z' => Kind::Identifier,
+            '.' if state == Kind::Number && part == 0 => {
+                part += 1;
+                Kind::Number
+            },
             '+' | '-' | '*' | '/' | ',' | '.' => Kind::Operator,
             '(' => Kind::LeftParenthesis,
             ')' => Kind::RightParenthesis,
@@ -146,6 +151,7 @@ fn tokenize(code: &str) -> Vec<Node> {
         if state == Kind::Default {
             state = kind;
             start = i;
+            part = 0;
         }
     }
     
@@ -307,6 +313,27 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn numbers() {
+        let mut builtins: Builtins = HashMap::new();
+        let code = "2";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::Float(2.0));
+
+        let code = "3.14";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::Float(3.14));
+
+        let code = "9.1.2";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::Property(Box::new(Value::Float(9.1)), Box::new(Value::Float(2.0))));
+    }
     #[test]
     fn expression_with_left_associativity() {
         let mut builtins: Builtins = HashMap::new();
