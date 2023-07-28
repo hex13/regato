@@ -97,7 +97,6 @@ fn tokenize(code: &str) -> Vec<Node> {
             ')' => Kind::RightParenthesis,
             _ => Kind::Default,
         };
-        println!("{}, {:?}, {:?}", ch, kind, state);
         if state != Kind::Default {
             if state != kind {
                 if state == Kind::LeftParenthesis && prev_state == Kind::Identifier {
