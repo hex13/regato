@@ -308,7 +308,7 @@ fn main() {
 mod tests {
     use super::*;
     #[test]
-    fn parse_expression_with_left_associativity() {
+    fn expression_with_left_associativity() {
         let mut builtins: Builtins = HashMap::new();
         let code = "2 - 5 + 1";
         let tokens = tokenize(code);
@@ -317,7 +317,58 @@ mod tests {
         assert_eq!(value, Value::Float(-2.0));
     }
     #[test]
-    fn parse_member_expression() {
+    fn function_calls() {
+        let mut builtins: Builtins = HashMap::from_iter([
+            (
+                "hello",
+                Value::Function(|args: ArgList| {
+                    Value::String("Hello World :)".into())
+                })
+            ),
+            (
+                "addTwo",
+                Value::Function(|args: ArgList| {
+                    Value::Float(args.get_float(0).unwrap() + 2.0)
+                })
+            ),
+            (
+                "sum",
+                Value::Function(|args: ArgList| {
+                    let mut sum = 0.0;
+                    for i in 0..args.data.len() {
+                        sum += args.get_float(i).unwrap();
+                    }
+                    Value::Float(sum)
+                })
+            ),
+        ]);
+        let code = "hello()";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::String("Hello World :)".into()));
+
+        let code = "addTwo(3)";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::Float(5.0));
+
+        let code = "sum(3, 10)";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::Float(13.0));
+
+        let code = "sum(3, 10, 20)";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value, Value::Float(33.0));
+    }
+
+    #[test]
+    fn member_expression() {
         let capital = Value::Object(
             Object {
                 data: HashMap::from_iter([("name", Value::String("Warszawa".into()))])
