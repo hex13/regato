@@ -17,8 +17,13 @@ enum Value {
     String(String),
     List(Vec<Value>),
     Function(fn(ArgList) -> Value),
+    Object(Object),
 }
 
+#[derive(PartialEq, Debug, Clone)]
+struct Object {
+    data: HashMap<&'static str, Value>,
+}
 struct ArgList {
     data: Vec<Value>,
 }
@@ -177,12 +182,22 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                     }
                 }
                 "." => {
-                    if let (Value::String(a), Value::String(b)) = (a, b) {
-                        // TODO make this work for real
-                        let s = a + "->" + &b;
-                        Value::String(s) 
+                    if let Some(Value::Object(obj)) = match &a {
+                        Value::String(var_name) => builtins.get(var_name.as_str()),
+                        obj @ Value::Object(_) => Some(obj),
+                        _ => None
+                    } {
+                        if let Value::String(prop) = &b {
+                            if let Some(value) = obj.data.get(prop.as_str()) {
+                                value.clone()
+                            } else {
+                                Value::String(format!("{:?} is not a property of {:?}", &b, &a))
+                            }
+                        } else {
+                            Value::String(format!("{:?} is not a string and only string properties are supported.", b))
+                        }
                     } else {
-                        Value::Float(0.0)
+                        Value::String(format!("{:?} is not an object.", a))
                     }
                 }
                 "()" => {
@@ -271,13 +286,22 @@ mod tests {
     }
     #[test]
     fn parse_member_expression() {
-        let mut builtins: Builtins = HashMap::new();
-        let code = "foo.bar.baz";
+        let capital = Value::Object(
+            Object {
+                data: HashMap::from_iter([("name", Value::String("Warszawa".into()))])
+            }
+        );
+        let data: HashMap<&str, Value> = HashMap::from_iter([
+            ("capital", capital),
+        ]);
+        let builtins: Builtins = HashMap::from_iter([
+            ("Poland", Value::Object(Object { data })),
+        ]);
+        let code = "Poland.capital.name";
         let tokens = tokenize(code);
         let program = parse(&tokens);
         let value = run(&program, &builtins);
-        // TODO make this work for real
-        assert_eq!(value, Value::String("foo->bar->baz".to_string()));
+        assert_eq!(value, Value::String("Warszawa".to_string()));
     }
 
 }
