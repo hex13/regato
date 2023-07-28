@@ -18,10 +18,18 @@ enum Value {
     List(Vec<Value>),
     Function(fn(ArgList) -> Value),
     Object(Object),
+    Property(Box<Value>, Box<Value>),
 }
 
 impl Value {
-    fn get_property(&self, prop: Value) -> Value {
+    fn evaluate(&self) -> Self {
+        if let Value::Property(obj, prop) = &self {
+            obj.evaluate().get_property(prop)
+        } else {
+            self.clone()
+        }
+    }
+    fn get_property(&self, prop: &Value) -> Value {
         if let Value::Object(obj) = self {
             if let Value::String(prop_name) = &prop {
                 if let Some(value) = obj.data.get(prop_name.as_str()) {
@@ -179,7 +187,7 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
             let a = stack.pop().unwrap();
             let result = match node.text() {
                 op @ ("+" | "-" | "*" | "/") => {
-                    if let (Value::Float(a), Value::Float(b)) = (a, b) {
+                    if let (Value::Float(a), Value::Float(b)) = (a.evaluate(), b.evaluate()) {
                         Value::Float(match op {
                             "+" => a + b,
                             "-" => a - b,
@@ -200,15 +208,14 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                     }
                 }
                 "." => {
-                    if let Some(obj) = match &a {
-                        Value::String(var_name) => builtins.get(var_name.as_str()),
-                        obj @ Value::Object(_) => Some(obj),
-                        _ => None
-                    } {
-                        obj.get_property(b)
+                    let obj = if let Value::String(var_name) = &a {
+                        builtins.get(var_name.as_str())
+                            .unwrap_or(&Value::String(format!("unknown variable: {}", var_name)))
+                            .clone()
                     } else {
-                        Value::String(format!("{:?} is not an object", a))
-                    }
+                        a
+                    };
+                    Value::Property(Box::new(obj), Box::new(b))
                 }
                 "()" => {
                     if let Value::String(func_name) = a {
@@ -311,7 +318,7 @@ mod tests {
         let tokens = tokenize(code);
         let program = parse(&tokens);
         let value = run(&program, &builtins);
-        assert_eq!(value, Value::String("Warszawa".to_string()));
+        assert_eq!(value.evaluate(), Value::String("Warszawa".to_string()));
     }
 
 }
