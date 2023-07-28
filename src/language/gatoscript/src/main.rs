@@ -9,6 +9,7 @@ enum Kind {
     Call,
     LeftParenthesis,
     RightParenthesis,
+    Empty,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -133,6 +134,9 @@ fn tokenize(code: &str) -> Vec<Node> {
             if state != kind {
                 if state == Kind::LeftParenthesis && prev_state == Kind::Identifier {
                     tokens.push(Node::new(Kind::Operator, Value::String("()".to_string())));
+                }
+                if state == Kind::RightParenthesis && prev_state == Kind::LeftParenthesis {
+                    tokens.push(Node::new(Kind::Empty, Value::Float(0.0)));
                 }
                 tokens.push(Node::new(state, Value::String(code[start..i].to_string())));
                 prev_state = state;
@@ -268,6 +272,9 @@ fn main() {
 
     let mut builtins: Builtins = HashMap::new();
 
+    builtins.insert("hello", Value::Function(|args: ArgList| {
+        Value::String("Hello World :)".into())
+    }));
     builtins.insert("ten", Value::Function(builtin_ten));
     builtins.insert("hundred", Value::Function(builtin_hundred));
 
@@ -276,8 +283,8 @@ fn main() {
     }));
 
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
-    let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
-    // let code = "foo.bar()";
+    // let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
+    let code = "hello()";
     // let code = "add(50,1, 13) + hundred(30)";
     // let code = "foo.bar.baz";
     // let code = "50,1, 13";
@@ -334,7 +341,7 @@ mod tests {
         let value = run(&program, &builtins);
         assert_eq!(value.evaluate(), Value::String("Warszawa".to_string()));
 
-        let code = "Poland.playAnthem(1)";
+        let code = "Poland.playAnthem()";
         let tokens = tokenize(code);
         let program = parse(&tokens);
         let value = run(&program, &builtins);
