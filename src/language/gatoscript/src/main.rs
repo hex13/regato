@@ -19,6 +19,7 @@ enum Value {
     Function(fn(ArgList) -> Value),
     Object(Object),
     Property(Box<Value>, Box<Value>),
+    Error(String),
 }
 
 impl Value {
@@ -35,13 +36,13 @@ impl Value {
                 if let Some(value) = obj.data.get(prop_name.as_str()) {
                     value.clone()
                 } else {
-                    Value::String(format!("{:?} is not a property of {:?}", &prop, self))
+                    Value::Error(format!("{:?} is not a property of {:?}", &prop, self))
                 }
             } else {
-                Value::String(format!("{:?} is not a string and only string properties are supported.", &prop))
+                Value::Error(format!("{:?} is not a string and only string properties are supported.", &prop))
             }
         } else {
-            Value::String(format!("{:?} is not an object.", self))
+            Value::Error(format!("{:?} is not an object.", self))
         }
     }
 }
@@ -210,7 +211,7 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                 "." => {
                     let obj = if let Value::String(var_name) = &a {
                         builtins.get(var_name.as_str())
-                            .unwrap_or(&Value::String(format!("unknown variable: {}", var_name)))
+                            .unwrap_or(&Value::Error(format!("unknown variable: {}", var_name)))
                             .clone()
                     } else {
                         a
@@ -226,10 +227,10 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                                 func(ArgList { data: vec![b] })
                             }
                         } else {
-                            Value::Float(0.0)
+                            Value::Error("not such function".into())
                         }
                     } else {
-                        Value::Float(0.0)
+                        Value::Error("bad function name".into())
                     }
                 }
                 _ => panic!("unknown operator `{}`", node.text()),
