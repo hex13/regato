@@ -68,12 +68,12 @@ impl ArgList {
 
 const precedence: [(&str, i32); 7] = [
     (",", 4),
-    (".", 6),
     ("+", 10),
     ("-", 10),
     ("*", 20),
     ("/", 20),
-    ("()", 100),
+    ("()", 30),
+    (".", 30),
 ];
 
 fn get_precedence(op: &Node) -> i32 {
@@ -219,18 +219,24 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                     Value::Property(Box::new(obj), Box::new(b))
                 }
                 "()" => {
-                    if let Value::String(func_name) = a {
-                        if let Value::Function(func) = builtins.get(func_name.as_str()).unwrap() {
-                            if let Value::List(args) = b {
-                                func(ArgList { data: args })
-                            } else {
-                                func(ArgList { data: vec![b] })
-                            }
+                    let func = if let Value::String(func_name) = a {
+                        if let func @ Value::Function(_) = builtins.get(func_name.as_str()).unwrap() {
+                            func.clone()
                         } else {
-                            Value::Error("not such function".into())
+                            Value::Error(format!("{:?} is not a function name", func_name))
                         }
                     } else {
-                        Value::Error("bad function name".into())
+                        a.evaluate()
+                    };
+
+                    if let Value::Function(func) = func {
+                        if let Value::List(args) = b {
+                            func(ArgList { data: args })
+                        } else {
+                            func(ArgList { data: vec![b] })
+                        }
+                    } else {
+                        Value::Error(format!("{:?} is not a function", func))
                     }
                 }
                 _ => panic!("unknown operator `{}`", node.text()),
@@ -271,6 +277,7 @@ fn main() {
 
     // let code = "(7 + 2) * (3 + 4)    *     2+1010-33*(4+3)*7";
     let code = "ten(3) + 3 + hundred(2) + add(10, 20, 30)";
+    // let code = "foo.bar()";
     // let code = "add(50,1, 13) + hundred(30)";
     // let code = "foo.bar.baz";
     // let code = "50,1, 13";
@@ -311,6 +318,12 @@ mod tests {
         );
         let data: HashMap<&str, Value> = HashMap::from_iter([
             ("capital", capital),
+            (
+                "playAnthem",
+                Value::Function(|argList| {
+                    Value::String("Jeszcze Polska nie zginęła...".into())
+                }),
+            ),
         ]);
         let builtins: Builtins = HashMap::from_iter([
             ("Poland", Value::Object(Object { data })),
@@ -320,6 +333,13 @@ mod tests {
         let program = parse(&tokens);
         let value = run(&program, &builtins);
         assert_eq!(value.evaluate(), Value::String("Warszawa".to_string()));
+
+        let code = "Poland.playAnthem(1)";
+        let tokens = tokenize(code);
+        let program = parse(&tokens);
+        let value = run(&program, &builtins);
+        assert_eq!(value.evaluate(), Value::String("Jeszcze Polska nie zginęła...".to_string()));
+
     }
 
 }
