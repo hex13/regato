@@ -20,6 +20,24 @@ enum Value {
     Object(Object),
 }
 
+impl Value {
+    fn get_property(&self, prop: Value) -> Value {
+        if let Value::Object(obj) = self {
+            if let Value::String(prop_name) = &prop {
+                if let Some(value) = obj.data.get(prop_name.as_str()) {
+                    value.clone()
+                } else {
+                    Value::String(format!("{:?} is not a property of {:?}", &prop, self))
+                }
+            } else {
+                Value::String(format!("{:?} is not a string and only string properties are supported.", &prop))
+            }
+        } else {
+            Value::String(format!("{:?} is not an object.", self))
+        }
+    }
+}
+
 #[derive(PartialEq, Debug, Clone)]
 struct Object {
     data: HashMap<&'static str, Value>,
@@ -182,22 +200,14 @@ fn run(program: &Vec<&Node>, builtins: &Builtins) -> Value {
                     }
                 }
                 "." => {
-                    if let Some(Value::Object(obj)) = match &a {
+                    if let Some(obj) = match &a {
                         Value::String(var_name) => builtins.get(var_name.as_str()),
                         obj @ Value::Object(_) => Some(obj),
                         _ => None
                     } {
-                        if let Value::String(prop) = &b {
-                            if let Some(value) = obj.data.get(prop.as_str()) {
-                                value.clone()
-                            } else {
-                                Value::String(format!("{:?} is not a property of {:?}", &b, &a))
-                            }
-                        } else {
-                            Value::String(format!("{:?} is not a string and only string properties are supported.", b))
-                        }
+                        obj.get_property(b)
                     } else {
-                        Value::String(format!("{:?} is not an object.", a))
+                        Value::String(format!("{:?} is not an object", a))
                     }
                 }
                 "()" => {
